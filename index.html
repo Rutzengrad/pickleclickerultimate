@@ -487,6 +487,61 @@ const LEGO_BRICK_OVERLAY='<g>'+
   '</g></g>';
 
 const specialSkins=[
+  {id:'gamer',icon:'\u{1F3AE}',name:'Gamer Pickle',tag:'Special',colors:['#2a1a3a','#1a0a28','#0a0514'],earn:{type:'load'},
+    overlay:'<g>'+
+      // backwards gaming cap
+      '<ellipse cx="80" cy="22" rx="40" ry="20" fill="#1a1a2a" stroke="#0a0a14" stroke-width="2"/>'+
+      '<path d="M40 24 Q24 28 16 26 Q14 20 24 14 Q40 12 44 20 Z" fill="#1a1a2a" stroke="#0a0a14" stroke-width="1.5"/>'+
+      '<rect x="57" y="35" width="46" height="7" fill="#111" stroke="#333" stroke-width="1"/>'+
+      '<text x="80" y="42" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="7" font-weight="900" fill="#ff3a3a">GAMER</text>'+
+      '<ellipse cx="68" cy="14" rx="14" ry="5" fill="#2a2a3a" opacity=".5"/>'+
+      // gaming headphones - large over-ear with RGB
+      '<path d="M38 60 Q80 32 122 60" fill="none" stroke="#0a0a14" stroke-width="8" stroke-linecap="round"/>'+
+      '<path d="M38 60 Q80 35 122 60" fill="none" stroke="#ff3a3a" stroke-width="3" stroke-linecap="round"/>'+
+      // left cup
+      '<ellipse cx="36" cy="74" rx="12" ry="16" fill="#1a1a1a" stroke="#0a0a14" stroke-width="2"/>'+
+      '<ellipse cx="38" cy="74" rx="7" ry="11" fill="#222"/>'+
+      '<ellipse cx="38" cy="74" rx="4.5" ry="7" fill="#ff3a3a" opacity=".5"/>'+
+      // right cup
+      '<ellipse cx="124" cy="74" rx="12" ry="16" fill="#1a1a1a" stroke="#0a0a14" stroke-width="2"/>'+
+      '<ellipse cx="122" cy="74" rx="7" ry="11" fill="#222"/>'+
+      '<ellipse cx="122" cy="74" rx="4.5" ry="7" fill="#ff3a3a" opacity=".5"/>'+
+      // mic boom on right
+      '<path d="M130 82 Q144 90 142 102" stroke="#333" stroke-width="2.5" stroke-linecap="round" fill="none"/>'+
+      '<circle cx="141" cy="104" r="3.5" fill="#222" stroke="#555" stroke-width="1.5"/>'+
+      // focused gamer eyes
+      '<ellipse cx="64" cy="108" rx="10" ry="8" fill="#fff" stroke="#111" stroke-width="2"/>'+
+      '<ellipse cx="96" cy="108" rx="10" ry="8" fill="#fff" stroke="#111" stroke-width="2"/>'+
+      '<circle cx="66" cy="109" r="4.5" fill="#111"/><circle cx="94" cy="109" r="4.5" fill="#111"/>'+
+      '<circle cx="68" cy="107" r="1.8" fill="#fff"/><circle cx="96" cy="107" r="1.8" fill="#fff"/>'+
+      // determined eyebrows
+      '<path d="M57 100 L70 104" stroke="#111" stroke-width="2.5" stroke-linecap="round"/>'+
+      '<path d="M103 100 L90 104" stroke="#111" stroke-width="2.5" stroke-linecap="round"/>'+
+      // focused smirk
+      '<path d="M68 128 Q76 133 86 128" stroke="#111" stroke-width="2.5" fill="none" stroke-linecap="round"/>'+
+      '</g>'},
+  {id:'brian',icon:'\u{1FAD9}',name:'Brian',tag:'Special',colors:['#c8e0a0','#88b848','#486820'],earn:{type:'clicks',value:10},
+    overlay:'<g>'+
+      // metal lid
+      '<ellipse cx="80" cy="22" rx="40" ry="10" fill="#888" stroke="#555" stroke-width="2"/>'+
+      '<ellipse cx="80" cy="20" rx="38" ry="8" fill="#aaa"/>'+
+      '<ellipse cx="80" cy="20" rx="30" ry="5" fill="none" stroke="#666" stroke-width="1.5" opacity=".6"/>'+
+      '<ellipse cx="80" cy="20" rx="20" ry="3" fill="none" stroke="#777" stroke-width="1" opacity=".5"/>'+
+      // glass reflections on jar sides
+      '<path d="M52 36 Q49 120 53 210" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".35"/>'+
+      '<path d="M58 36 Q56 90 59 140" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".25"/>'+
+      // brine bubbles
+      '<circle cx="98" cy="68" r="3.5" fill="none" stroke="#fff" stroke-width="1.2" opacity=".5"/>'+
+      '<circle cx="105" cy="50" r="2.5" fill="none" stroke="#fff" stroke-width="1" opacity=".4"/>'+
+      '<circle cx="102" cy="88" r="2" fill="none" stroke="#fff" stroke-width="1" opacity=".4"/>'+
+      '<circle cx="95" cy="46" r="1.5" fill="none" stroke="#fff" stroke-width="1" opacity=".35"/>'+
+      // jar label
+      '<rect x="46" y="105" width="68" height="44" fill="#f8f0d0" stroke="#c09840" stroke-width="2" rx="4"/>'+
+      '<rect x="48" y="107" width="64" height="40" fill="none" stroke="#c09840" stroke-width="1" rx="3" opacity=".5"/>'+
+      '<text x="80" y="123" text-anchor="middle" font-family="Impact,Arial Black,sans-serif" font-size="11" font-weight="900" fill="#c06010">BRIAN\'S</text>'+
+      '<text x="80" y="136" text-anchor="middle" font-family="Impact,Arial Black,sans-serif" font-size="8" font-weight="700" fill="#486820">BRINE JAR</text>'+
+      '<text x="80" y="146" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" fill="#888">est. in a pickle</text>'+
+      '</g>'},
   {id:'buff',icon:'\u{1F4AA}',name:'Buff',tag:'Special',colors:['#8a9a4a','#4a5a20','#2a3010'],earn:{type:'dna',value:10},
     overlay:'<g>'+
       // LEFT ARM
@@ -541,6 +596,29 @@ const specialSkins=[
       '<circle cx="94" cy="112" r="2.2" fill="#ff5050"/>'+
       '<circle cx="94" cy="111" r="1" fill="#ffcccc"/>'+
       // no mouth - the lack of one is the look
+      '</g>'},
+  {id:'poop',icon:'\u{1F4A9}',name:'#2',tag:'Special',colors:['#8B5A2B','#6B3A1F','#3D1F0A'],earn:{type:'clicks',value:1000},
+    overlay:'<g>'+
+      // poop swirl - 4 stacked coils, wider at base
+      '<ellipse cx="80" cy="32" rx="28" ry="11" fill="#5a2d0c" stroke="#3D1F0A" stroke-width="1.5"/>'+
+      '<ellipse cx="80" cy="22" rx="22" ry="10" fill="#6B3A1F" stroke="#3D1F0A" stroke-width="1.5"/>'+
+      '<ellipse cx="80" cy="13" rx="16" ry="9" fill="#7A4520" stroke="#3D1F0A" stroke-width="1.5"/>'+
+      '<ellipse cx="80" cy="6" rx="10" ry="7" fill="#8B5A2B" stroke="#3D1F0A" stroke-width="1.5"/>'+
+      '<ellipse cx="80" cy="2" rx="6" ry="4" fill="#9B6A3B" stroke="#3D1F0A" stroke-width="1"/>'+
+      // highlight on swirl
+      '<ellipse cx="74" cy="20" rx="4" ry="6" fill="#9B6A3B" opacity=".5"/>'+
+      // eyes
+      '<circle cx="66" cy="108" r="11" fill="#fff" stroke="#3D1F0A" stroke-width="2"/>'+
+      '<circle cx="94" cy="108" r="11" fill="#fff" stroke="#3D1F0A" stroke-width="2"/>'+
+      '<circle cx="68" cy="110" r="5" fill="#3D1F0A"/><circle cx="92" cy="110" r="5" fill="#3D1F0A"/>'+
+      '<circle cx="70" cy="108" r="2" fill="#fff"/><circle cx="94" cy="108" r="2" fill="#fff"/>'+
+      // wavy stinky smile
+      '<path d="M64 132 Q72 127 80 132 Q88 137 96 132" stroke="#3D1F0A" stroke-width="3" fill="none" stroke-linecap="round"/>'+
+      // stink lines floating beside
+      '<path d="M46 55 Q42 44 47 34" stroke="#88cc22" stroke-width="2" fill="none" stroke-linecap="round" opacity=".8"/>'+
+      '<path d="M38 62 Q34 50 39 40" stroke="#88cc22" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>'+
+      '<path d="M114 55 Q118 44 113 34" stroke="#88cc22" stroke-width="2" fill="none" stroke-linecap="round" opacity=".8"/>'+
+      '<path d="M122 62 Q126 50 121 40" stroke="#88cc22" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>'+
       '</g>'},
   {id:'dino',icon:'\u{1F996}',name:'No Internet Dino',tag:'Google',colors:['#a8a8a8','#777777','#444444'],
     earn:{type:'offline',value:30},
@@ -1049,6 +1127,7 @@ function checkEarned(){
       if(r.type==='clicks'&&state.totalClicks>=r.value)met=true;
       else if(r.type==='offline'&&state.offlineSeconds>=r.value)met=true;
       else if(r.type==='wear'&&state.worn===r.skinId)met=true;
+      else if(r.type==='load')met=true;
       if(met){
         state.earned.push(s.id);any=true;
         $('battleLog').innerHTML='\u{1F389} You earned the <b>'+s.name+'</b> skin! Equip it in the Dressing Room.';
@@ -1064,6 +1143,7 @@ function earnText(s){
   if(r.type==='clicks')return 'Click '+r.value.toLocaleString()+'\u00D7 ('+Math.min(state.totalClicks,r.value).toLocaleString()+'/'+r.value.toLocaleString()+')';
   if(r.type==='offline')return 'Play offline '+r.value+'s ('+Math.min(state.offlineSeconds,r.value)+'/'+r.value+')';
   if(r.type==='wear'){const t=breeds.find(b=>b.id===r.skinId);return 'Wear '+(t?t.name:r.skinId);}
+  if(r.type==='load')return 'Open the game';
   if(r.type==='dna')return 'Unlock in Brine Lab ('+r.value+' \u{1F9EC})';
   if(r.type==='bricks')return 'Unlock in Lego Builds Center ('+r.value+' \u{1F9F1})';
   if(r.type==='beats')return 'Unlock in Sprunky Song Room ('+r.value+' \u{1F3B5})';
@@ -1768,6 +1848,7 @@ function renderSprunkySongRoom(){
 setInterval(()=>save(true),15000);
 window.addEventListener('beforeunload',()=>save(true));
 $('saveTag').textContent='Auto-saves on';
+checkEarned(); // unlock 'load' type skins on first visit
 
 // ---- offline tracker (for No Internet Dino skin) ----
 setInterval(()=>{
