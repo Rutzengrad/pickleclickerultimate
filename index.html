@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PICKLE CLICKER</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@400;500;600;700&display=swap');
+  :root{
+    --brine:#d4e84a;--pickle-dark:#3a5a14;--pickle-mid:#5c8a1f;--pickle-light:#86b73a;
+    --jar:#1a2b08;--warn:#e85d3a;--gold:#ffd23f;--purple:#b06cd4;--cyan:#3fb6d4;--pink:#ff7eb6;--dna:#5fe0c0;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;user-select:none;}
+  body{
+    font-family:'Fredoka',sans-serif;color:#f0f7d8;min-height:100vh;overflow-x:hidden;
+    background:radial-gradient(circle at 20% 10%,#3a5a14 0,transparent 45%),
+      radial-gradient(circle at 85% 90%,#4a6b1a 0,transparent 40%),#1a2b08;
+  }
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.05;
+    background-image:repeating-linear-gradient(45deg,#fff 0 2px,transparent 2px 6px);}
+  header{text-align:center;padding:16px 12px 6px;}
+  h1{font-family:'Bungee',cursive;font-size:clamp(28px,7vw,54px);color:var(--brine);
+    text-shadow:3px 3px 0 var(--pickle-dark),6px 6px 0 rgba(0,0,0,.3);line-height:1;}
+  .tagline{color:var(--pickle-light);font-weight:600;margin-top:4px;font-size:13px;letter-spacing:2px;text-transform:uppercase;}
+  .layout{max-width:1180px;margin:0 auto;padding:10px 16px 60px;display:grid;grid-template-columns:1fr 360px;gap:20px;}
+  @media(max-width:880px){.layout{grid-template-columns:1fr;}}
+
+  .clicker-zone{display:flex;flex-direction:column;align-items:center;
+    background:linear-gradient(180deg,rgba(212,232,74,.08),rgba(0,0,0,.2));
+    border:3px solid var(--pickle-mid);border-radius:24px;padding:22px 20px 26px;position:relative;overflow:hidden;}
+  .clicker-zone::before,.clicker-zone::after{
+    content:'';position:absolute;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(212,232,74,.5),rgba(212,232,74,.05) 60%,transparent 70%);
+    pointer-events:none;animation:bubble 12s ease-in-out infinite;
+  }
+  .clicker-zone::before{width:120px;height:120px;left:-30px;top:30%;animation-delay:0s;opacity:.35;}
+  .clicker-zone::after{width:80px;height:80px;right:-20px;top:60%;animation-delay:-4s;opacity:.3;}
+  @keyframes bubble{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-30px) scale(1.1)}}
+  .pickle-wrap{position:relative;margin:12px 0 6px;cursor:pointer;z-index:1;}.pickle-svg{width:min(50vw,220px);height:auto;display:block;filter:drop-shadow(0 14px 18px rgba(0,0,0,.5)) drop-shadow(0 0 22px rgba(212,232,74,.25));transition:transform .07s ease;}
+  .rebirth-tag{position:absolute;top:14px;right:16px;font-family:'Bungee';font-size:13px;
+    color:var(--purple);background:rgba(176,108,212,.15);border:2px solid var(--purple);border-radius:10px;padding:4px 10px;}
+  .save-tag{position:absolute;top:14px;left:16px;font-size:11px;color:var(--pickle-light);}
+  .pname-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:2px;}
+  .pname{font-family:'Bungee',cursive;font-size:clamp(16px,4vw,24px);color:var(--brine);
+    text-shadow:2px 2px 0 var(--pickle-dark);line-height:1;cursor:pointer;}
+  .pname-edit{font-family:'Bungee';cursor:pointer;font-size:14px;background:none;border:none;color:var(--pickle-light);}
+  .pname-input{font-family:'Bungee';font-size:18px;text-align:center;border-radius:10px;border:2px solid var(--brine);
+    background:rgba(0,0,0,.4);color:var(--brine);padding:4px 10px;width:200px;-webkit-user-select:text;user-select:text;}
+  .score{font-family:'Bungee',cursive;font-size:clamp(34px,9vw,64px);color:var(--gold);text-shadow:2px 2px 0 #000;line-height:1;}
+  .score-label{font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--brine);font-size:13px;text-align:center;}
+  .per-click{margin-top:6px;color:var(--pickle-light);font-weight:600;text-align:center;}
+  .per-click b{color:var(--gold);}
+  .mult-line{font-size:12px;color:var(--pink);margin-top:2px;font-weight:600;text-align:center;}
+  .currencies{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;justify-content:center;font-size:13px;font-weight:700;}
+  .cur{background:rgba(0,0,0,.3);border-radius:10px;padding:4px 10px;}
+  .cur.tok{color:var(--purple);}.cur.size{color:var(--cyan);}.cur.dna{color:var(--dna);}
+  .pet-stage{display:flex;align-items:flex-end;justify-content:center;gap:6px;min-height:30px;margin-top:-4px;}
+  .pet-stage .pet{font-size:26px;line-height:1;animation:petbob 2s ease-in-out infinite;filter:drop-shadow(0 4px 4px rgba(0,0,0,.4));}
+  .pet-stage .pet:nth-child(2n){animation-delay:.4s;}
+  .pet-stage .pet:nth-child(3n){animation-delay:.8s;}
+  @keyframes petbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  .pickle-wrap:active .pickle-svg{transform:scale(.93);}
+  .pickle-wrap.mega .pickle-svg{animation:wobble .4s ease;}
+  @keyframes wobble{0%,100%{transform:rotate(0)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
+  .float{position:absolute;font-family:'Bungee',cursive;color:var(--gold);font-size:22px;pointer-events:none;
+    text-shadow:1px 1px 0 #000;animation:floatUp 1s ease-out forwards;z-index:5;}
+  @keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(.6)}20%{transform:translateY(-14px) scale(1.2)}100%{opacity:0;transform:translateY(-90px) scale(1)}}
+
+  .rebirth-box{margin-top:12px;text-align:center;width:100%;}
+  .rebirth-btn{font-family:'Bungee';font-size:15px;cursor:pointer;border:none;border-radius:14px;
+    padding:12px 18px;color:#fff;background:var(--purple);border-bottom:4px solid #7a3fa0;transition:.12s;width:100%;}
+  .rebirth-btn:hover{transform:translateY(-1px);}
+  .rebirth-btn:active{transform:translateY(2px);border-bottom-width:2px;}
+  .rebirth-btn:disabled{opacity:.45;cursor:not-allowed;}
+  .rebirth-note{font-size:12px;color:var(--pickle-light);margin-top:6px;}
+
+  .savebar{display:flex;gap:8px;margin-top:12px;width:100%;}
+  .sbtn{flex:1;font-family:'Fredoka';font-weight:700;font-size:13px;cursor:pointer;border:none;border-radius:12px;
+    padding:9px;color:#fff;background:#2e4710;border-bottom:3px solid #1a2b08;transition:.12s;}
+  .sbtn:hover{transform:translateY(-1px);}
+  .sbtn:active{transform:translateY(2px);border-bottom-width:1px;}
+  .sbtn.reset{background:#6a2a2a;border-bottom-color:#401414;}
+
+  .mode-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;justify-content:center;}
+  .mode-btn{font-family:'Fredoka';font-weight:700;font-size:14px;cursor:pointer;border:none;border-radius:14px;
+    padding:10px 16px;color:#fff;background:#2e4710;border-bottom:4px solid #1a2b08;transition:.12s;}
+  .mode-btn:hover{transform:translateY(-1px);}
+  .mode-btn:active{transform:translateY(2px);border-bottom-width:2px;}
+  .mode-btn.active{background:var(--warn);border-bottom-color:#a33;}
+  .mode-btn.multi.active{background:var(--cyan);border-bottom-color:#1a6a96;}
+  .mode-btn.locked{opacity:.5;cursor:not-allowed;}
+  .multi-banner{margin-top:12px;font-weight:700;color:#7fd4ff;background:rgba(63,182,212,.15);
+    border:2px dashed var(--cyan);border-radius:12px;padding:6px 14px;font-size:14px;display:none;}
+  .multi-banner.show{display:block;animation:pulse 1.2s infinite;}
+  @keyframes pulse{50%{opacity:.55}}
+
+  .panel{background:linear-gradient(180deg,rgba(212,232,74,.04),rgba(0,0,0,.3));border:3px solid var(--pickle-mid);border-radius:20px;padding:16px;margin-bottom:18px;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 6px 16px rgba(0,0,0,.25);}
+  .panel.locked{opacity:.55;}
+  .panel h2{font-family:'Bungee',cursive;font-size:16px;color:var(--brine);margin-bottom:4px;letter-spacing:.5px;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:2px solid rgba(212,232,74,.15);padding-bottom:6px;}
+  .panel h2::after{content:'▾';font-size:14px;color:var(--pickle-light);transition:transform .2s;}
+  .panel.col h2{margin-bottom:0;border-bottom:none;padding-bottom:0;}
+  .panel.col h2::after{transform:rotate(-90deg);}
+  .panel.col>*:not(h2){display:none!important;}
+  .panel .sub{font-size:12px;color:var(--pickle-light);margin-bottom:10px;}
+  .lock-msg{font-size:13px;color:var(--purple);font-weight:600;padding:6px 0;}
+  .shop-item{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border-radius:12px;
+    padding:9px;margin-bottom:7px;cursor:pointer;border:2px solid transparent;transition:.12s;}
+  .shop-item:hover{border-color:var(--pickle-light);background:rgba(255,255,255,.1);}
+  .shop-item.cant{opacity:.45;cursor:not-allowed;}
+  .shop-icon{font-size:24px;line-height:1;}
+  .shop-info{flex:1;}
+  .shop-name{font-weight:700;font-size:14px;}
+  .shop-desc{font-size:11px;color:var(--pickle-light);}
+  .shop-cost{font-family:'Bungee';font-size:12px;color:var(--gold);white-space:nowrap;}
+  .shop-owned{font-size:11px;color:#9fc46a;font-weight:600;}
+  .shop-cost.tok{color:var(--purple);}.shop-cost.size{color:var(--cyan);}.shop-cost.dna{color:var(--dna);}
+  .wear-btn{font-family:'Fredoka';font-weight:700;font-size:12px;cursor:pointer;border:none;border-radius:9px;
+    padding:6px 12px;color:#fff;background:#2e4710;border-bottom:2px solid #1a2b08;white-space:nowrap;}
+  .wear-btn:active{transform:translateY(1px);}
+  .wear-btn.on{background:var(--brine);color:#1a2b08;border-bottom-color:#9ab02a;}
+  .wardrobe-note{font-size:12px;color:var(--pickle-light);margin-top:8px;text-align:center;}
+  .wardrobe-note b{color:var(--brine);}
+  .reset-skin{font-family:'Fredoka';font-weight:700;font-size:12px;cursor:pointer;border:none;border-radius:9px;
+    margin-top:6px;padding:6px 12px;color:#fff;background:#4a3a14;border-bottom:2px solid #2a2008;}
+  .music-btn{font-family:'Bungee';font-size:14px;cursor:pointer;border:none;border-radius:14px;width:100%;
+    padding:12px;color:#fff;background:#7a3fa0;border-bottom:4px solid #4a1a6a;transition:.12s;margin-bottom:10px;}
+  .music-btn:active{transform:translateY(2px);border-bottom-width:2px;}
+  .music-btn.on{background:var(--pink);border-bottom-color:#c4527f;animation:pulse 1s infinite;}
+  .beats-bar{font-size:13px;font-weight:700;color:var(--pink);margin-bottom:12px;text-align:center;}
+  /* dressing room */
+  .dr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .dr-card{background:rgba(255,255,255,.05);border:2px solid transparent;border-radius:14px;padding:10px 6px 8px;
+    text-align:center;cursor:pointer;transition:.12s;}
+  .dr-card:hover{border-color:var(--pickle-light);background:rgba(255,255,255,.1);}
+  .dr-card.worn{border-color:var(--brine);background:rgba(212,232,74,.14);}
+  .dr-card.locked{opacity:.4;cursor:not-allowed;}
+  .dr-card svg{width:54px;height:auto;display:block;margin:0 auto 4px;}
+  .dr-name{font-size:11px;font-weight:700;line-height:1.1;}
+  .dr-tag{font-size:9px;color:var(--pickle-light);text-transform:uppercase;letter-spacing:.5px;}
+  .dr-card.worn .dr-tag{color:var(--brine);}
+  /* classes */
+  .cls-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .cls-card{background:rgba(255,255,255,.05);border:2px solid transparent;border-radius:14px;padding:12px 8px;
+    text-align:center;cursor:pointer;transition:.12s;}
+  .cls-card:hover{border-color:var(--pickle-light);background:rgba(255,255,255,.1);}
+  .cls-card.sel{border-color:var(--gold);background:rgba(255,210,63,.14);}
+  .cls-emoji{font-size:30px;}
+  .cls-name{font-family:'Bungee';font-size:13px;color:var(--brine);margin-top:2px;}
+  .cls-card.sel .cls-name{color:var(--gold);}
+  .cls-desc{font-size:11px;color:var(--pickle-light);margin-top:3px;line-height:1.2;}
+  .cls-active{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--gold);margin-top:4px;font-weight:700;height:11px;}
+
+  /* breeding lab */
+  .breed-pick{display:flex;gap:8px;margin-bottom:8px;}
+  .breed-slot{flex:1;background:rgba(0,0,0,.3);border:2px dashed var(--dna);border-radius:12px;padding:8px;text-align:center;font-size:13px;min-height:54px;cursor:pointer;}
+  .breed-slot.filled{border-style:solid;background:rgba(95,224,192,.12);}
+  .breed-slot .be{font-size:22px;}
+  .breed-btn{width:100%;font-family:'Bungee';font-size:13px;cursor:pointer;border:none;border-radius:12px;
+    padding:10px;color:#1a2b08;background:var(--dna);border-bottom:4px solid #2a9c84;transition:.12s;margin-bottom:8px;}
+  .breed-btn:active{transform:translateY(2px);border-bottom-width:2px;}
+  .breed-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .breed-owned{font-size:11px;color:var(--dna);margin-bottom:8px;}
+  .chooser{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+  .chooser .opt{font-size:13px;font-weight:700;cursor:pointer;border-radius:9px;padding:6px 10px;background:#2e4710;border:2px solid transparent;}
+  .chooser .opt.sel{border-color:var(--dna);background:rgba(95,224,192,.15);}
+
+  .battle-arena{text-align:center;}
+  .fighters{display:flex;justify-content:space-around;align-items:center;margin:8px 0;}
+  .fighter{flex:1;}
+  .fighter .emoji{font-size:40px;}
+  .fighter .hp-bar{height:9px;background:#3a1a1a;border-radius:6px;overflow:hidden;margin-top:6px;}
+  .fighter .hp-fill{height:100%;background:linear-gradient(90deg,#7fd84a,#d4e84a);transition:width .3s;}
+  .fighter .hp-fill.foe{background:linear-gradient(90deg,#e85d3a,#ffb03a);}
+  .vs{font-family:'Bungee';color:var(--warn);font-size:18px;padding:0 6px;}
+  .fighter .name{font-weight:700;font-size:12px;}
+  .fighter .pow{font-size:11px;color:var(--gold);}
+  .battle-log{font-size:13px;min-height:38px;background:rgba(0,0,0,.3);border-radius:10px;padding:8px;margin-top:10px;text-align:left;line-height:1.4;}
+  .battle-prog{font-size:11px;color:var(--pickle-light);margin-top:6px;}
+  .battle-btn{width:100%;margin-top:10px;font-family:'Bungee';font-size:14px;cursor:pointer;border:none;
+    border-radius:14px;padding:11px;color:#fff;background:var(--warn);border-bottom:4px solid #a33;transition:.12s;}
+  .battle-btn:hover{transform:translateY(-1px);}
+  .battle-btn:active{transform:translateY(2px);border-bottom-width:2px;}
+  .battle-btn:disabled{opacity:.5;cursor:not-allowed;}
+</style>
+</head>
+<body>
+<header>
+  <h1>PICKLE CLICKER</h1>
+  <div class="tagline">click &middot; rebirth &middot; breed &middot; battle</div>
+</header>
+
+<div class="layout">
+  <div class="clicker-zone">
+    <div class="save-tag" id="saveTag"></div>
+    <div class="rebirth-tag" id="rebirthTag">REBIRTH 0</div>
+    <div class="pname-row" id="pnameRow">
+      <span class="pname" id="pnameText" title="Click to rename">Sir Picklesworth</span>
+      <button class="pname-edit" id="pnameEdit" title="Rename">&#9999;&#65039;</button>
+    </div>
+    <div class="score" id="score">0</div>
+    <div class="score-label">Pickle Points</div>
+    <div class="per-click">+<b id="perClick">1</b> per click &middot; <b id="strength">1</b>&times; strength</div>
+    <div class="mult-line" id="multLine"></div>
+    <div class="currencies">
+      <div class="cur tok">&#129689; <span id="curTok">0</span> Tokens</div>
+      <div class="cur size">&#128208; <span id="curSize">0</span> Size</div>
+      <div class="cur dna">&#129516; <span id="curDna">0</span> DNA</div>
+      <div class="cur" style="color:#e8c84a;">&#129521; <span id="curBricks">0</span> Bricks</div>
+      <div class="cur" style="color:#ff7eb6;">&#127925; <span id="curBeats">0</span> Beats</div>
+      <div class="cur" style="color:#1a73e8;">&#129689; <span id="curGcoins">0</span> G-Coins</div>
+    </div>
+    <div class="wardrobe-note" id="wornNote"></div>
+
+    <div class="pickle-wrap" id="pickleWrap">
+      <svg class="pickle-svg" viewBox="0 0 160 240">
+        <defs>
+          <linearGradient id="pg" x1="0.15" y1="0" x2="0.9" y2="0.5">
+            <stop id="pgA" offset="0" stop-color="#86b73a"/>
+            <stop id="pgB" offset=".5" stop-color="#5c8a1f"/>
+            <stop id="pgC" offset="1" stop-color="#2a4a0c"/>
+          </linearGradient>
+          <radialGradient id="pgHL" cx=".28" cy=".15" r=".55">
+            <stop offset="0" stop-color="#fff" stop-opacity=".5"/>
+            <stop offset=".55" stop-color="#fff" stop-opacity=".07"/>
+            <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="grShad" cx=".5" cy=".5" r=".5">
+            <stop offset="0" stop-color="#000" stop-opacity=".4"/>
+            <stop offset="1" stop-color="#000" stop-opacity="0"/>
+          </radialGradient>
+          <clipPath id="bodyClip">
+            <path d="M48 38 Q48 18 80 18 Q112 18 112 38 L112 208 Q112 226 80 226 Q48 226 48 208 Z"/>
+          </clipPath>
+        </defs>
+        <ellipse cx="80" cy="232" rx="40" ry="5" fill="url(#grShad)"/>
+        <ellipse cx="80" cy="20" rx="32" ry="5" fill="#1a2b08"/>
+        <ellipse cx="80" cy="19" rx="30" ry="3.5" fill="#3a5a14"/>
+        <ellipse cx="80" cy="18.5" rx="26" ry="2" fill="#5c8a1f" opacity=".7"/>
+        <path d="M48 38 Q48 18 80 18 Q112 18 112 38 L112 208 Q112 226 80 226 Q48 226 48 208 Z" fill="url(#pg)" stroke="#1a2b08" stroke-width="2.5"/>
+        <g clip-path="url(#bodyClip)">
+          <path d="M58 25 Q56 125 60 222" stroke="#1a2b08" stroke-width=".8" fill="none" opacity=".28"/>
+          <path d="M72 25 Q71 125 73 222" stroke="#1a2b08" stroke-width=".7" fill="none" opacity=".22"/>
+          <path d="M88 25 Q89 125 87 222" stroke="#1a2b08" stroke-width=".7" fill="none" opacity=".22"/>
+          <path d="M102 25 Q104 125 100 222" stroke="#1a2b08" stroke-width=".8" fill="none" opacity=".28"/>
+          <ellipse cx="66" cy="85" rx="20" ry="55" fill="url(#pgHL)"/>
+          <g fill="#1a2b08">
+            <ellipse cx="60" cy="38" rx="2" ry="1.7"/>
+            <ellipse cx="92" cy="44" rx="1.8" ry="1.5"/>
+            <ellipse cx="75" cy="52" rx="2.2" ry="1.8"/>
+            <ellipse cx="102" cy="58" rx="1.9" ry="1.6"/>
+            <ellipse cx="55" cy="65" rx="2" ry="1.7"/>
+            <ellipse cx="83" cy="70" rx="2.1" ry="1.7"/>
+            <ellipse cx="98" cy="78" rx="1.8" ry="1.5"/>
+            <ellipse cx="64" cy="82" rx="2" ry="1.6"/>
+            <ellipse cx="89" cy="92" rx="2.2" ry="1.8"/>
+            <ellipse cx="54" cy="100" rx="1.9" ry="1.6"/>
+            <ellipse cx="96" cy="107" rx="2.1" ry="1.7"/>
+            <ellipse cx="71" cy="113" rx="1.9" ry="1.6"/>
+            <ellipse cx="103" cy="122" rx="2.2" ry="1.8"/>
+            <ellipse cx="58" cy="130" rx="2" ry="1.7"/>
+            <ellipse cx="84" cy="138" rx="2.1" ry="1.7"/>
+            <ellipse cx="100" cy="148" rx="1.9" ry="1.6"/>
+            <ellipse cx="68" cy="155" rx="2.2" ry="1.8"/>
+            <ellipse cx="55" cy="165" rx="2" ry="1.6"/>
+            <ellipse cx="91" cy="170" rx="1.9" ry="1.6"/>
+            <ellipse cx="104" cy="180" rx="2.1" ry="1.7"/>
+            <ellipse cx="65" cy="186" rx="2" ry="1.7"/>
+            <ellipse cx="87" cy="196" rx="2.2" ry="1.8"/>
+            <ellipse cx="56" cy="200" rx="1.9" ry="1.6"/>
+            <ellipse cx="78" cy="210" rx="2" ry="1.6"/>
+            <ellipse cx="99" cy="214" rx="1.8" ry="1.5"/>
+          </g>
+          <g fill="#a3d152" opacity=".7">
+            <circle cx="58.5" cy="36.8" r=".7"/>
+            <circle cx="90.5" cy="42.8" r=".6"/>
+            <circle cx="73.5" cy="50.8" r=".7"/>
+            <circle cx="100.5" cy="56.8" r=".6"/>
+            <circle cx="53.5" cy="63.8" r=".7"/>
+            <circle cx="81.5" cy="68.8" r=".7"/>
+            <circle cx="62.5" cy="80.8" r=".7"/>
+            <circle cx="87.5" cy="90.8" r=".7"/>
+            <circle cx="94.5" cy="105.8" r=".7"/>
+            <circle cx="69.5" cy="111.8" r=".7"/>
+            <circle cx="101.5" cy="120.8" r=".7"/>
+            <circle cx="56.5" cy="128.8" r=".7"/>
+            <circle cx="82.5" cy="136.8" r=".7"/>
+            <circle cx="66.5" cy="153.8" r=".7"/>
+            <circle cx="89.5" cy="168.8" r=".7"/>
+            <circle cx="63.5" cy="184.8" r=".7"/>
+            <circle cx="85.5" cy="194.8" r=".7"/>
+          </g>
+        </g>
+        <g id="outfitLayer"></g>
+        <g id="skinOverlay"></g>
+      </svg>
+    </div>
+    <div class="pet-stage" id="petStage"></div>
+
+    <div class="rebirth-box">
+      <button class="rebirth-btn" id="rebirthBtn">REBIRTH</button>
+      <div class="rebirth-note" id="rebirthNote"></div>
+    </div>
+
+    <div class="savebar">
+      <button class="sbtn" id="saveBtn">&#128190; Save</button>
+      <button class="sbtn" id="loadBtn">&#128229; Load</button>
+      <button class="sbtn reset" id="wipeBtn">&#128465;&#65039; Reset</button>
+    </div>
+
+    <div class="mode-row">
+      <button class="mode-btn active" id="soloBtn">&#129362; Solo</button>
+      <button class="mode-btn multi locked" id="multiBtn">&#128274; Multiplayer (2&times;)</button>
+    </div>
+    <div class="multi-banner" id="multiBanner">&#128293; MULTIPLAYER ON &mdash; DOUBLE POINTS! &#128293;</div>
+  </div>
+
+  <div class="side">
+    <div class="panel">
+      <h2>&#127891; Pickle Class</h2>
+      <div class="sub">Pick a class for a special bonus. You can switch anytime, free.</div>
+      <div class="cls-grid" id="classBody"></div>
+    </div>
+
+    <div class="panel">
+      <h2>&#129362; Mini-Pickle Shop</h2>
+      <div class="sub">Boost your strength. More items unlock as you rebirth.</div>
+      <div id="shop"></div>
+    </div>
+
+    <div class="panel">
+      <h2>&#128087; Dressing Room</h2>
+      <div class="sub">Equip any skin you own. Cosmetic only &mdash; tap a pickle to wear it.</div>
+      <div class="dr-grid" id="dressingBody"></div>
+    </div>
+
+    <div class="panel">
+      <h2>&#129507; Pickle Clothing Room</h2>
+      <div class="sub">Buy with points and dress your pickle. Wear one item per slot &mdash; mix &amp; match!</div>
+      <div id="clothingBody"></div>
+    </div>
+
+    <div class="panel">
+      <h2>&#128062; Pickle Pets</h2>
+      <div class="sub">Buy with points. Each pet stands beside your pickle and gives a stacking &times;1.5 points.</div>
+      <div id="petsBody"></div>
+    </div>
+
+    <div class="panel">
+      <h2>&#129521; Lego Builds Center</h2>
+      <div class="sub">Lego Bricks trickle in automatically over time. Build sets for point bonuses or cool decorations beside your pickle.</div>
+      <div id="legoBody"></div>
+      <div id="legoDisplay" style="min-height:28px;margin-top:8px;text-align:center;font-size:22px;letter-spacing:4px;"></div>
+    </div>
+
+    <div class="panel" id="sprunkySongPanel">
+      <h2>&#127926; Sprunky Song Room</h2>
+      <div class="sub">Play Sprunki-inspired music to earn Beats &#127925;. Use Beats to unlock Sprunky skins and pets. No Sprunky skin can wear clothing.</div>
+      <div id="sprunkySongBody"></div>
+    </div>
+
+    <div class="panel">
+      <h2>&#127918; Google Games Zone</h2>
+      <div class="sub">Play the Dino Runner to earn G-Coins &#129689;. Spend them on Google skins and pets!</div>
+      <div id="googleGameBody"></div>
+    </div>
+
+    <div class="panel" id="typesPanel">
+      <h2>&#129516; Pickle Types (Brining)</h2>
+      <div class="sub">Permanent point multipliers, bought with Pickle Points. Bred custom pickles appear here too.</div>
+      <div id="typesBody"></div>
+    </div>
+
+    <div class="panel" id="craftPanel">
+      <h2>&#129514; Brine Lab</h2>
+      <div class="sub">Tokens &rarr; Size &rarr; DNA. Spend DNA to unlock breeds, then mix two breeds into a custom pickle.</div>
+      <div id="craftBody"></div>
+    </div>
+
+    <div class="panel" id="breedPanel">
+      <h2>&#129516; Breeding Lab</h2>
+      <div class="sub">Pick two breeds you own and mix them to create a custom pickle for the Types shop.</div>
+      <div id="breedBody"></div>
+    </div>
+
+    <div class="panel battle-arena">
+      <h2>&#9876;&#65039; Pickle Battle</h2>
+      <div class="fighters">
+        <div class="fighter">
+          <div class="emoji">&#129362;</div><div class="name" id="myFighterName">YOU</div>
+          <div class="pow">PWR <span id="myPow">1</span></div>
+          <div class="hp-bar"><div class="hp-fill" id="myHp" style="width:100%"></div></div>
+        </div>
+        <div class="vs">VS</div>
+        <div class="fighter">
+          <div class="emoji" id="foeEmoji">&#129516;</div><div class="name" id="foeName">Rival Gherkin</div>
+          <div class="pow">PWR <span id="foePow">3</span></div>
+          <div class="hp-bar"><div class="hp-fill foe" id="foeHp" style="width:100%"></div></div>
+        </div>
+      </div>
+      <div class="battle-log" id="battleLog">Click FIGHT to challenge a rival. Win for bonus points!</div>
+      <div class="battle-prog" id="battleProg"></div>
+      <button class="battle-btn" id="fightBtn">FIGHT! (cost: 50 pts)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SAVE_KEY='pickleClickerSave_v2';
+const state={
+  score:0,baseStrength:1,multi:false,rebirth:0,inBattle:false,foeIdx:0,maxFoe:0,name:'Sir Picklesworth',
+  tokens:0,size:0,dna:0,
+  bricks:0,           // lego bricks currency (trickles in over time)
+  bricksBuilt:[],     // ids of completed lego builds
+  legoPetsOwned:[],   // ids of owned lego pets
+  beats:0,            // sprunky beats currency (trickles while music plays)
+  sprunkyPetsOwned:[], // ids of owned sprunky pets
+  gcoins:0,           // g-coins earned by playing dino runner
+  googlePetsOwned:[],  // ids of owned google pets
+  breedsOwned:[],   // ids of unlocked base breeds
+  customs:[],       // {id,name,icon,mult,owned}
+  worn:'default',   // id of equipped skin (breed id, custom id, or 'default')
+  outfit:{head:null,face:null,neck:null,body:null,legs:null}, // equipped clothing per slot
+  totalClicks:0,    // total ever clicked (for earning skins)
+  offlineSeconds:0, // total seconds played while offline (for earning skins)
+  earned:[],        // ids of earned-by-play skins
+  cls:null,         // chosen player class id
+  bs1:null,bs2:null // breeding slot selections
+};
+
+const upgrades=[
+  {id:'baby',  icon:'\u{1F952}',name:'Baby Pickle',     add:1,      base:25,         minR:0,owned:0},
+  {id:'corn',  icon:'\u{1F33D}',name:'Cornichon',       add:3,      base:120,        minR:0,owned:0},
+  {id:'spear', icon:'\u{1F531}',name:'Dill Spear',      add:8,      base:600,        minR:0,owned:0},
+  {id:'jar',   icon:'\u{1FAD9}',name:'Brine Jar',       add:25,     base:3000,       minR:0,owned:0},
+  {id:'king',  icon:'\u{1F451}',name:'King Pickle',     add:100,    base:15000,      minR:0,owned:0},
+  {id:'egg',   icon:'\u{1F95A}',name:'Pickled Egg',     add:250,    base:35000,      minR:1,owned:0},
+  {id:'rocket',icon:'\u{1F680}',name:'Rocket Relish',   add:400,    base:90000,      minR:2,owned:0},
+  {id:'atom',  icon:'\u269B\uFE0F',name:'Atomic Cucumber',add:900,  base:250000,     minR:3,owned:0},
+  {id:'galaxy',icon:'\u{1F30C}',name:'Galaxy Gherkin',  add:1500,   base:600000,     minR:4,owned:0},
+  {id:'quantum',icon:'\u{1F52E}',name:'Quantum Brine',  add:3000,   base:1700000,    minR:5,owned:0},
+  {id:'god',   icon:'\u26A1',name:'Pickle Deity',       add:6000,   base:5000000,    minR:6,owned:0},
+  {id:'dim',   icon:'\u{1F300}',name:'Dimensional Dill',add:20000,  base:18000000,   minR:7,owned:0},
+  {id:'sing',  icon:'\u{1F573}\uFE0F',name:'Brine Singularity',add:75000,base:65000000,minR:8,owned:0},
+  {id:'multi', icon:'\u{1F30C}',name:'Pickle Multiverse',add:300000,base:250000000,  minR:9,owned:0},
+  {id:'eternal',icon:'\u267E\uFE0F',name:'Eternal Gherkin',add:1500000,base:1000000000,minR:10,owned:0},
+];
+
+// Types shop: permanent point multipliers, bought with POINTS now
+const types=[
+  {id:'dill',  icon:'\u{1F952}',name:'Dill Classic',  mult:1.5, base:40000,  owned:0},
+  {id:'spicy', icon:'\u{1F336}\uFE0F',name:'Spicy Pickle',  mult:2,   base:250000, owned:0},
+  {id:'sweet', icon:'\u{1F36F}',name:'Sweet Bread',    mult:3,   base:1500000,owned:0},
+  {id:'kosher',icon:'\u2721\uFE0F',name:'Kosher Dill',    mult:5,   base:9000000,owned:0},
+  {id:'cosmic',icon:'\u{1F31F}',name:'Cosmic Pickle',  mult:10,  base:60000000,owned:0},
+];
+
+// base breeds unlockable with DNA (used for mixing). colors[] = [light, mid, dark] for wearing
+const breeds=[
+  {id:'green', icon:'\u{1F952}',name:'Garden',  cost:1, mult:1.2, colors:['#86b73a','#5c8a1f','#3a5a14']},
+  {id:'fire',  icon:'\u{1F525}',name:'Fire',    cost:2, mult:1.4, colors:['#ff9a3a','#e8552a','#a32814']},
+  {id:'ice',   icon:'\u2744\uFE0F',name:'Frost', cost:3, mult:1.6, colors:['#bff0ff','#5fc4e8','#2a7aa3']},
+  {id:'fish',  icon:'\u{1F41F}',name:'Fish',    cost:4, mult:1.8, colors:['#d4e8e6','#7fb4b8','#3a6878']},
+  {id:'gold',  icon:'\u{1F7E1}',name:'Golden',  cost:5, mult:2.0, colors:['#ffe87a','#ffc83a','#c49414']},
+  {id:'void',  icon:'\u{1F311}',name:'Void',    cost:8, mult:2.5, colors:['#9a7ad4','#5e3aa0','#2a1850']},
+  {id:'star',  icon:'\u2B50',name:'Starlight',  cost:12,mult:3.0, colors:['#fff0bf','#b06cd4','#3a2a6a']},
+  {id:'rizz',  icon:'\u{1F60E}',name:'Rizz Lord',cost:20,mult:4.2, colors:['#4a4a4a','#1a1a20','#050510']},
+];
+const DEFAULT_COLORS=['#86b73a','#5c8a1f','#3a5a14'];
+
+// special skins - appear in the dressing room alongside breeds, but include an overlay (extra art on top of the pickle)
+// shared LEGO brick overlay — uses url(#pg) so it auto-matches any LEGO skin's gradient
+const LEGO_BRICK_OVERLAY='<g>'+
+  '<rect x="63" y="10" width="34" height="11" fill="url(#pg)" rx="2" stroke="rgba(0,0,0,.5)" stroke-width="1.5"/>'+
+  '<ellipse cx="80" cy="10" rx="17" ry="5.5" fill="url(#pg)" stroke="rgba(0,0,0,.5)" stroke-width="1.5"/>'+
+  '<ellipse cx="80" cy="10" rx="9" ry="2.5" fill="rgba(0,0,0,.2)"/>'+
+  '<g clip-path="url(#bodyClip)">'+
+    '<line x1="0" y1="71" x2="160" y2="71" stroke="rgba(0,0,0,.5)" stroke-width="4"/>'+
+    '<line x1="0" y1="120" x2="160" y2="120" stroke="rgba(0,0,0,.5)" stroke-width="4"/>'+
+    '<line x1="0" y1="169" x2="160" y2="169" stroke="rgba(0,0,0,.5)" stroke-width="4"/>'+
+    '<rect x="101" y="22" width="9" height="49" fill="rgba(0,0,0,.35)"/>'+
+    '<rect x="101" y="71" width="9" height="49" fill="rgba(0,0,0,.35)"/>'+
+    '<rect x="101" y="120" width="9" height="49" fill="rgba(0,0,0,.35)"/>'+
+    '<rect x="101" y="169" width="9" height="51" fill="rgba(0,0,0,.35)"/>'+
+    '<rect x="0" y="22" width="160" height="9" fill="rgba(255,255,255,.2)"/>'+
+    '<rect x="0" y="71" width="160" height="9" fill="rgba(255,255,255,.2)"/>'+
+    '<rect x="0" y="120" width="160" height="9" fill="rgba(255,255,255,.2)"/>'+
+    '<rect x="0" y="169" width="160" height="9" fill="rgba(255,255,255,.2)"/>'+
+  '</g></g>';
+
+const specialSkins=[
+  {id:'buff',icon:'\u{1F4AA}',name:'Buff',tag:'Special',colors:['#8a9a4a','#4a5a20','#2a3010'],earn:{type:'dna',value:10},
+    overlay:'<g>'+
+      // LEFT ARM
+      '<path d="M52 115 Q38 100 32 78 Q30 64 38 60 L48 64 Q54 82 56 100 L56 115 Z" fill="url(#pg)" stroke="#1a2b08" stroke-width="2"/>'+
+      '<ellipse cx="38" cy="75" rx="9" ry="7" fill="url(#pg)" stroke="#1a2b08" stroke-width="1.8"/>'+
+      '<path d="M32 60 Q26 50 30 42 Q36 36 46 42 L48 54 Q44 60 38 60 Z" fill="url(#pg)" stroke="#1a2b08" stroke-width="2"/>'+
+      '<ellipse cx="38" cy="48" rx="7" ry="8" fill="url(#pg)" stroke="#1a2b08" stroke-width="2"/>'+
+      // RIGHT ARM
+      '<path d="M108 115 Q122 100 128 78 Q130 64 122 60 L112 64 Q106 82 104 100 L104 115 Z" fill="url(#pg)" stroke="#1a2b08" stroke-width="2"/>'+
+      '<ellipse cx="122" cy="75" rx="9" ry="7" fill="url(#pg)" stroke="#1a2b08" stroke-width="1.8"/>'+
+      '<path d="M128 60 Q134 50 130 42 Q124 36 114 42 L112 54 Q116 60 122 60 Z" fill="url(#pg)" stroke="#1a2b08" stroke-width="2"/>'+
+      '<ellipse cx="122" cy="48" rx="7" ry="8" fill="url(#pg)" stroke="#1a2b08" stroke-width="2"/>'+
+      // RIZZ FACE - dark sunglasses bar
+      '<path d="M58 108 L102 108 L102 118 L58 118 Z" fill="#0a0a0a"/>'+
+      '<ellipse cx="66" cy="113" rx="8" ry="5" fill="#0a0a0a" stroke="#1a2b08" stroke-width="1.5"/>'+
+      '<ellipse cx="94" cy="113" rx="8" ry="5" fill="#0a0a0a" stroke="#1a2b08" stroke-width="1.5"/>'+
+      '<line x1="74" y1="113" x2="86" y2="113" stroke="#1a2b08" stroke-width="2"/>'+
+      '<ellipse cx="63" cy="111" rx="2" ry="1" fill="#fff" opacity=".75"/>'+
+      '<ellipse cx="91" cy="111" rx="2" ry="1" fill="#fff" opacity=".75"/>'+
+      // smirk
+      '<path d="M70 134 Q82 138 92 130" stroke="#1a2b08" stroke-width="3" fill="none" stroke-linecap="round"/>'+
+      '<path d="M92 130 Q94 130 95 128" stroke="#1a2b08" stroke-width="2" fill="none" stroke-linecap="round"/>'+
+      // chest pecs
+      '<path d="M60 148 Q80 154 100 148" stroke="#1a2b08" stroke-width="1.8" fill="none" opacity=".55"/>'+
+      '<line x1="80" y1="148" x2="80" y2="174" stroke="#1a2b08" stroke-width="1.2" opacity=".4"/>'+
+      // abs
+      '<line x1="68" y1="172" x2="92" y2="172" stroke="#1a2b08" stroke-width="1" opacity=".4"/>'+
+      '<line x1="68" y1="184" x2="92" y2="184" stroke="#1a2b08" stroke-width="1" opacity=".4"/>'+
+      '<line x1="70" y1="196" x2="90" y2="196" stroke="#1a2b08" stroke-width="1" opacity=".35"/>'+
+      '</g>'},
+  {id:'subscriber',icon:'\u{1F464}',name:'Subscriber Pickle',tag:'Special',colors:['#2a2a2a','#0f0f0f','#000000'],earn:{type:'dna',value:15},
+    overlay:'<g>'+
+      // backwards black baseball cap - main dome
+      '<ellipse cx="80" cy="22" rx="38" ry="20" fill="#080808" stroke="#1a1a1a" stroke-width="2"/>'+
+      // bill peeking out behind/side (showing the cap is on backwards)
+      '<path d="M44 18 Q30 20 22 24 Q20 16 30 10 Q46 8 50 16 Z" fill="#0a0a0a" stroke="#1a1a1a" stroke-width="1.5"/>'+
+      // back-of-cap adjustable strap visible at the front
+      '<rect x="60" y="33" width="40" height="6" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>'+
+      '<rect x="74" y="34" width="12" height="4" fill="#050505" stroke="#3a3a3a" stroke-width=".8"/>'+
+      '<circle cx="78" cy="36" r="1.2" fill="#3a3a3a"/>'+
+      '<circle cx="82" cy="36" r="1.2" fill="#3a3a3a"/>'+
+      // dome highlight
+      '<ellipse cx="68" cy="13" rx="14" ry="5" fill="#3a3a3a" opacity=".4"/>'+
+      // red eye glow (large soft halo)
+      '<circle cx="66" cy="112" r="8" fill="#ff0000" opacity=".22"/>'+
+      '<circle cx="94" cy="112" r="8" fill="#ff0000" opacity=".22"/>'+
+      // red eyes - layered for glow effect
+      '<circle cx="66" cy="112" r="4" fill="#ff1010"/>'+
+      '<circle cx="66" cy="112" r="2.2" fill="#ff5050"/>'+
+      '<circle cx="66" cy="111" r="1" fill="#ffcccc"/>'+
+      '<circle cx="94" cy="112" r="4" fill="#ff1010"/>'+
+      '<circle cx="94" cy="112" r="2.2" fill="#ff5050"/>'+
+      '<circle cx="94" cy="111" r="1" fill="#ffcccc"/>'+
+      // no mouth - the lack of one is the look
+      '</g>'},
+  {id:'dino',icon:'\u{1F996}',name:'No Internet Dino',tag:'Google',colors:['#a8a8a8','#777777','#444444'],
+    earn:{type:'offline',value:30},
+    overlay:'<g fill="#1a1a1a">'+
+      // head top
+      '<rect x="86" y="98" width="14" height="6"/>'+
+      '<rect x="84" y="104" width="16" height="8"/>'+
+      // eye (light pixel)
+      '<rect x="92" y="105" width="3" height="3" fill="#e8e8e8"/>'+
+      // mouth notch
+      '<rect x="96" y="110" width="6" height="2"/>'+
+      // neck/upper body
+      '<rect x="74" y="110" width="20" height="6"/>'+
+      // mid body
+      '<rect x="60" y="114" width="34" height="10"/>'+
+      // tail
+      '<rect x="50" y="116" width="12" height="6"/>'+
+      '<rect x="44" y="118" width="8" height="4"/>'+
+      // tiny arm dot
+      '<rect x="82" y="123" width="3" height="3"/>'+
+      // back leg
+      '<rect x="66" y="124" width="6" height="10"/>'+
+      '<rect x="64" y="132" width="10" height="3"/>'+
+      // front leg
+      '<rect x="84" y="124" width="6" height="10"/>'+
+      '<rect x="82" y="132" width="10" height="3"/>'+
+      '</g>'},
+  {id:'oreon',icon:'\u{1F7E0}',name:'Sprunky Oreon',tag:'Sprunky',colors:['#ffb84a','#ff8a1a','#c45a0a'],noClothing:true,
+    earn:{type:'beats',value:20},    overlay:'<g>'+
+      // DEELY-BOBBER ANTENNAE - two springy stems with orange balls on top
+      // left antenna
+      '<path d="M68 22 Q64 16 66 10 Q68 6 63 5" stroke="#a04408" stroke-width="2.5" fill="none" stroke-linecap="round"/>'+
+      '<circle cx="63" cy="5" r="6" fill="#ff8a1a" stroke="#a04408" stroke-width="2"/>'+
+      '<circle cx="61" cy="3" r="1.8" fill="#ffd28a" opacity=".8"/>'+
+      // right antenna
+      '<path d="M92 22 Q96 16 94 10 Q92 6 97 5" stroke="#a04408" stroke-width="2.5" fill="none" stroke-linecap="round"/>'+
+      '<circle cx="97" cy="5" r="6" fill="#ff8a1a" stroke="#a04408" stroke-width="2"/>'+
+      '<circle cx="95" cy="3" r="1.8" fill="#ffd28a" opacity=".8"/>'+
+      // ORANGE HEADPHONES
+      // band over the head
+      '<path d="M40 55 Q80 28 120 55" fill="none" stroke="#a04408" stroke-width="6" stroke-linecap="round"/>'+
+      '<path d="M40 55 Q80 31 120 55" fill="none" stroke="#ff8a1a" stroke-width="3" stroke-linecap="round"/>'+
+      // left ear cup
+      '<ellipse cx="42" cy="68" rx="9" ry="13" fill="#c45a0a" stroke="#1a1a1a" stroke-width="2"/>'+
+      '<ellipse cx="44" cy="68" rx="5" ry="9" fill="#ff8a1a"/>'+
+      // right ear cup
+      '<ellipse cx="118" cy="68" rx="9" ry="13" fill="#c45a0a" stroke="#1a1a1a" stroke-width="2"/>'+
+      '<ellipse cx="116" cy="68" rx="5" ry="9" fill="#ff8a1a"/>'+
+      // SPRUNKI FACE
+      // big round eyes
+      '<circle cx="64" cy="108" r="11" fill="#fff" stroke="#000" stroke-width="2"/>'+
+      '<circle cx="96" cy="108" r="11" fill="#fff" stroke="#000" stroke-width="2"/>'+
+      '<circle cx="66" cy="110" r="5" fill="#000"/>'+
+      '<circle cx="94" cy="110" r="5" fill="#000"/>'+
+      '<circle cx="68" cy="108" r="2" fill="#fff"/>'+
+      '<circle cx="96" cy="108" r="2" fill="#fff"/>'+
+      // sprunki wide open mouth
+      '<path d="M58 134 Q80 156 102 134 Q102 150 80 154 Q58 150 58 134 Z" fill="#3a0a0a" stroke="#000" stroke-width="2.5"/>'+
+      '<path d="M62 138 L66 145 L70 138 L74 145 L78 138 L82 145 L86 138 L90 145 L94 138 L98 145" fill="#fff" stroke="#000" stroke-width="1"/>'+
+      '<ellipse cx="80" cy="148" rx="13" ry="3.5" fill="#c44a4a" opacity=".8"/>'+
+      '</g>'},
+  {id:'brix',  icon:'\u{1F9F1}',name:'Brix',  tag:'Lego',colors:['#E84027','#C91A09','#8B1006'],earn:{type:'bricks',value:40}, overlay:LEGO_BRICK_OVERLAY},
+  {id:'blox',  icon:'\u{1F7E6}',name:'Blox',  tag:'Lego',colors:['#5599FF','#0055BF','#003388'],earn:{type:'bricks',value:60}, overlay:LEGO_BRICK_OVERLAY},
+  {id:'goldie',icon:'\u{1F7E1}',name:'Goldie',tag:'Lego',colors:['#FFE060','#F2CD37','#C49800'],earn:{type:'bricks',value:80}, overlay:LEGO_BRICK_OVERLAY},
+  {id:'leafy', icon:'\u{1F7E2}',name:'Leafy', tag:'Lego',colors:['#70D050','#4B9F4A','#235022'],earn:{type:'bricks',value:100},overlay:LEGO_BRICK_OVERLAY},
+  {id:'nox',   icon:'\u2B1B',   name:'Nox',   tag:'Lego',colors:['#3A3A44','#1B2A34','#08080E'],earn:{type:'bricks',value:150},overlay:LEGO_BRICK_OVERLAY},
+  // Google skins — unlocked with G-Coins in the Google Games Zone
+  {id:'chrome', icon:'\u{1F535}',name:'Chrome',   tag:'Google',colors:['#8BBCF0','#4285F4','#1A5CA0'],earn:{type:'gcoins',value:50}},
+  {id:'mapspin',icon:'\u{1F4CD}',name:'Maps Pin', tag:'Google',colors:['#FF8080','#EA4335','#A01010'],earn:{type:'gcoins',value:80}},
+  {id:'googler',icon:'\u{1F310}',name:'Google',   tag:'Google',colors:['#FBBC05','#34A853','#4285F4'],earn:{type:'gcoins',value:120}},
+  // Sprunki character skins — unlocked with Beats in the Sprunky Song Room
+  {id:'wenda',icon:'\u{1F7E2}',name:'Sprunky Wenda',tag:'Sprunky',colors:['#88DD44','#44AA11','#226600'],noClothing:true,earn:{type:'beats',value:30},
+    overlay:'<g>'+
+      '<path d="M57 32 Q52 90 54 160" stroke="#226600" stroke-width="7" fill="none" stroke-linecap="round"/>'+
+      '<path d="M103 32 Q108 90 106 160" stroke="#226600" stroke-width="7" fill="none" stroke-linecap="round"/>'+
+      '<circle cx="64" cy="108" r="11" fill="#fff" stroke="#000" stroke-width="2"/>'+
+      '<circle cx="96" cy="108" r="11" fill="#fff" stroke="#000" stroke-width="2"/>'+
+      '<circle cx="66" cy="110" r="5" fill="#000"/><circle cx="94" cy="110" r="5" fill="#000"/>'+
+      '<circle cx="68" cy="108" r="2" fill="#fff"/><circle cx="96" cy="108" r="2" fill="#fff"/>'+
+      '<path d="M65 130 Q80 140 95 130" stroke="#000" stroke-width="3" fill="none" stroke-linecap="round"/>'+
+      '<circle cx="108" cy="148" r="9" fill="#888" stroke="#333" stroke-width="2"/>'+
+      '<ellipse cx="108" cy="147" rx="5" ry="4" fill="#aaa"/>'+
+      '<rect x="106" y="157" width="4" height="22" fill="#666" stroke="#333" stroke-width="1"/>'+
+      '</g>'},
+  {id:'clukr',icon:'\u{1F414}',name:'Sprunky Clukr',tag:'Sprunky',colors:['#FFE040','#F0C000','#C09000'],noClothing:true,earn:{type:'beats',value:45},
+    overlay:'<g>'+
+      '<path d="M65 24 Q62 10 68 18 Q65 4 73 14 Q71 2 79 12 Q77 1 84 12 Q82 3 88 16" fill="#e85d3a" stroke="#c03020" stroke-width="1.5"/>'+
+      '<circle cx="64" cy="108" r="11" fill="#fff" stroke="#333" stroke-width="2"/>'+
+      '<circle cx="96" cy="108" r="11" fill="#fff" stroke="#333" stroke-width="2"/>'+
+      '<circle cx="66" cy="110" r="5" fill="#333"/><circle cx="94" cy="110" r="5" fill="#333"/>'+
+      '<circle cx="68" cy="108" r="2" fill="#fff"/><circle cx="96" cy="108" r="2" fill="#fff"/>'+
+      '<path d="M69 128 L80 138 L91 128 Q80 147 69 128 Z" fill="#FFD700" stroke="#c0a000" stroke-width="1.5"/>'+
+      '<ellipse cx="80" cy="148" rx="8" ry="5" fill="#e85d3a"/>'+
+      '</g>'},
+  {id:'tunner',icon:'\u{1F1F9}',name:'Sprunky Tunner',tag:'Sprunky',colors:['#66BBFF','#2277DD','#0044AA'],noClothing:true,earn:{type:'beats',value:60},
+    overlay:'<g>'+
+      '<path d="M40 96 Q24 118 18 142" stroke="#6B3A1F" stroke-width="5" stroke-linecap="round" fill="none"/>'+
+      '<circle cx="18" cy="144" r="6" fill="#ddd" stroke="#888" stroke-width="1.5"/>'+
+      '<path d="M120 96 Q136 118 142 142" stroke="#6B3A1F" stroke-width="5" stroke-linecap="round" fill="none"/>'+
+      '<circle cx="142" cy="144" r="6" fill="#ddd" stroke="#888" stroke-width="1.5"/>'+
+      '<circle cx="64" cy="108" r="11" fill="#fff" stroke="#000" stroke-width="2"/>'+
+      '<circle cx="96" cy="108" r="11" fill="#fff" stroke="#000" stroke-width="2"/>'+
+      '<circle cx="66" cy="110" r="5" fill="#000"/><circle cx="94" cy="110" r="5" fill="#000"/>'+
+      '<circle cx="68" cy="108" r="2" fill="#fff"/><circle cx="96" cy="108" r="2" fill="#fff"/>'+
+      '<path d="M68 132 Q80 138 92 130" stroke="#000" stroke-width="3" fill="none" stroke-linecap="round"/>'+
+      '</g>'},
+  {id:'gray',icon:'\u{1F4A8}',name:'Sprunky Gray',tag:'Sprunky',colors:['#BBBBBB','#888888','#555555'],noClothing:true,earn:{type:'beats',value:80},
+    overlay:'<g>'+
+      '<circle cx="64" cy="108" r="11" fill="#fff" stroke="#555" stroke-width="2"/>'+
+      '<circle cx="96" cy="108" r="11" fill="#fff" stroke="#555" stroke-width="2"/>'+
+      '<circle cx="65" cy="110" r="5" fill="#333"/><circle cx="95" cy="110" r="5" fill="#333"/>'+
+      '<circle cx="66.5" cy="108" r="1.8" fill="#fff"/><circle cx="96.5" cy="108" r="1.8" fill="#fff"/>'+
+      '<line x1="66" y1="132" x2="94" y2="132" stroke="#555" stroke-width="3.5" stroke-linecap="round"/>'+
+      '<path d="M78 90 Q80 82 82 90" stroke="#555" stroke-width="2" fill="none"/>'+
+      '</g>'},
+  {id:'simon',icon:'\u{1F47B}',name:'Sprunky Simon',tag:'Sprunky',colors:['#F8F8F8','#D8D8D8','#A8A8A8'],noClothing:true,earn:{type:'beats',value:100},
+    overlay:'<g>'+
+      '<ellipse cx="80" cy="4" rx="18" ry="8" fill="#F8F8F8" stroke="#999" stroke-width="1.5" opacity=".9"/>'+
+      '<ellipse cx="80" cy="6" rx="10" ry="4" fill="#fff" opacity=".7"/>'+
+      '<circle cx="64" cy="108" r="12" fill="#fff" stroke="#999" stroke-width="1.5"/>'+
+      '<circle cx="96" cy="108" r="12" fill="#fff" stroke="#999" stroke-width="1.5"/>'+
+      '<ellipse cx="65" cy="110" r="5" ry="5" fill="#333"/><ellipse cx="95" cy="110" r="5" ry="5" fill="#333"/>'+
+      '<circle cx="67" cy="108" r="2" fill="#fff"/><circle cx="97" cy="108" r="2" fill="#fff"/>'+
+      '<path d="M65 134 Q80 150 95 134 Q95 147 80 152 Q65 147 65 134 Z" fill="#e0e0e0" stroke="#999" stroke-width="1.5"/>'+
+      '<path d="M68 138 L71 144 L74 138 L77 144 L80 138 L83 144 L86 138 L89 144 L92 138" fill="#fff" stroke="#999" stroke-width="1"/>'+
+      '</g>'},
+];
+
+// player classes - pick one, switchable, each gives a distinct bonus
+const classes=[
+  {id:'clicker',icon:'\u{1F5B1}\uFE0F',name:'Clicker', desc:'\u00D72 points per click'},
+  {id:'warrior',icon:'\u2694\uFE0F',name:'Warrior', desc:'\u00D72 battle rewards & take less damage'},
+  {id:'brewer', icon:'\u{1F9EA}',name:'Brewer',  desc:'\u00D72 rebirth tokens & cheaper Brine Lab'},
+];
+
+// pickle clothing: accessories worn on top of the pickle. Mix and match across slots.
+const clothing=[
+  {id:'bowtie', icon:'\u{1F380}',name:'Bow Tie',     slot:'neck',cost:1000,    x:80,y:222,size:28,owned:false},
+  {id:'tie',    icon:'\u{1F454}',name:'Necktie',     slot:'neck',cost:5000,    x:80,y:222,size:32,owned:false},
+  {id:'scarf',  icon:'\u{1F9E3}',name:'Scarf',       slot:'neck',cost:25000,   x:80,y:222,size:34,owned:false},
+  {id:'glasses',icon:'\u{1F453}',name:'Glasses',     slot:'face',cost:2000,    x:80,y:95, size:34,owned:false},
+  {id:'shades', icon:'\u{1F576}\uFE0F',name:'Sunglasses', slot:'face',cost:10000,x:80,y:95, size:34,owned:false},
+  {id:'goggles',icon:'\u{1F97D}',name:'Goggles',     slot:'face',cost:40000,   x:80,y:95, size:34,owned:false},
+  {id:'party',  icon:'\u{1F389}',name:'Party Hat',   slot:'head',cost:3000,    x:80,y:8,  size:38,owned:false},
+  {id:'cap',    icon:'\u{1F9E2}',name:'Baseball Cap',slot:'head',cost:8000,    x:80,y:10, size:40,owned:false},
+  {id:'grad',   icon:'\u{1F393}',name:'Grad Cap',    slot:'head',cost:20000,   x:80,y:10, size:40,owned:false},
+  {id:'tophat', icon:'\u{1F3A9}',name:'Top Hat',     slot:'head',cost:60000,   x:80,y:6,  size:44,owned:false},
+  {id:'crown',  icon:'\u{1F451}',name:'Royal Crown', slot:'head',cost:200000,  x:80,y:8,  size:42,owned:false},
+  {id:'helmet', icon:'\u{1FA96}',name:'Helmet',      slot:'head',cost:500000,  x:80,y:8,  size:42,owned:false},
+  // custom-drawn original clothing items
+  {id:'dumshirt',icon:'\u{1F455}',name:'"Worlds Dumest" Shirt',slot:'body',cost:15000,owned:false,
+    svg:'<g><path d="M42 105 L52 102 Q66 95 80 95 Q94 95 108 102 L118 105 L118 122 L108 124 L108 165 Q108 173 100 173 L60 173 Q52 173 52 165 L52 124 L42 122 Z" fill="#f0e8d0" stroke="#1a2b08" stroke-width="2"/>'+
+        '<path d="M70 100 Q80 108 90 100" fill="none" stroke="#1a2b08" stroke-width="1.5"/>'+
+        '<text x="80" y="135" text-anchor="middle" font-family="Impact,Arial Black,sans-serif" font-size="9" font-weight="900" fill="#c41414">WORLDS</text>'+
+        '<text x="80" y="147" text-anchor="middle" font-family="Impact,Arial Black,sans-serif" font-size="9" font-weight="900" fill="#c41414">DUMEST</text></g>'},
+  {id:'phones',icon:'\u{1F3A7}',name:'Pickle Headphones',slot:'face',cost:35000,owned:false,
+    svg:'<g><path d="M44 55 Q80 18 116 55" fill="none" stroke="#2a4a0c" stroke-width="6" stroke-linecap="round"/>'+
+        '<path d="M44 55 Q80 22 116 55" fill="none" stroke="#86b73a" stroke-width="2.5" stroke-linecap="round"/>'+
+        '<ellipse cx="44" cy="68" rx="9" ry="13" fill="#3a5a14" stroke="#1a2b08" stroke-width="2"/>'+
+        '<ellipse cx="46" cy="68" rx="5" ry="9" fill="#5c8a1f"/>'+
+        '<circle cx="42" cy="63" r="1.2" fill="#1a2b08"/><circle cx="47" cy="71" r="1.2" fill="#1a2b08"/>'+
+        '<ellipse cx="116" cy="68" rx="9" ry="13" fill="#3a5a14" stroke="#1a2b08" stroke-width="2"/>'+
+        '<ellipse cx="114" cy="68" rx="5" ry="9" fill="#5c8a1f"/>'+
+        '<circle cx="118" cy="63" r="1.2" fill="#1a2b08"/><circle cx="113" cy="71" r="1.2" fill="#1a2b08"/></g>'},
+  {id:'pants',icon:'\u{1F456}',name:'White Pants',slot:'legs',cost:10000,owned:false,
+    svg:'<g><path d="M50 178 L110 178 L112 220 Q112 228 104 226 L82 224 L78 224 L56 226 Q48 228 48 220 Z" fill="#fafafa" stroke="#1a2b08" stroke-width="2"/>'+
+        '<line x1="52" y1="186" x2="108" y2="186" stroke="#1a2b08" stroke-width="1" opacity=".5"/>'+
+        '<line x1="80" y1="186" x2="80" y2="225" stroke="#1a2b08" stroke-width="1" opacity=".4"/></g>'},
+  {id:'buff',icon:'\u{1F4AA}',name:'Buff Pickle',slot:'body',cost:75000,owned:false,
+    svg:'<g>'+
+        // left arm: shoulder->bicep->forearm, flexed up
+        '<path d="M52 115 Q38 100 32 78 Q30 64 38 60 L48 64 Q54 82 56 100 L56 115 Z" fill="url(#pg)" stroke="#1a2b08" stroke-width="2"/>'+
+        '<ellipse cx="38" cy="75" rx="9" ry="7" fill="url(#pg)" stroke="#1a2b08" stroke-width="1.8"/>'+
+        '<path d="M32 60 Q26 50 30 42 Q36 36 46 42 L48 54 Q44 60 38 60 Z" fill="url(#pg)" stroke="#1a2b08" stroke-width="2"/>'+
+        '<ellipse cx="38" cy="48" rx="7" ry="8" fill="url(#pg)" stroke="#1a2b08" stroke-width="2"/>'+
+        // right arm (mirror)
+        '<path d="M108 115 Q122 100 128 78 Q130 64 122 60 L112 64 Q106 82 104 100 L104 115 Z" fill="url(#pg)" stroke="#1a2b08" stroke-width="2"/>'+
+        '<ellipse cx="122" cy="75" rx="9" ry="7" fill="url(#pg)" stroke="#1a2b08" stroke-width="1.8"/>'+
+        '<path d="M128 60 Q134 50 130 42 Q124 36 114 42 L112 54 Q116 60 122 60 Z" fill="url(#pg)" stroke="#1a2b08" stroke-width="2"/>'+
+        '<ellipse cx="122" cy="48" rx="7" ry="8" fill="url(#pg)" stroke="#1a2b08" stroke-width="2"/>'+
+        // angry eyebrows
+        '<path d="M60 100 L74 106" stroke="#1a2b08" stroke-width="3.5" stroke-linecap="round"/>'+
+        '<path d="M100 100 L86 106" stroke="#1a2b08" stroke-width="3.5" stroke-linecap="round"/>'+
+        // intense eyes
+        '<ellipse cx="69" cy="113" rx="3.5" ry="3" fill="#fff"/>'+
+        '<circle cx="70" cy="114" r="1.8" fill="#1a2b08"/>'+
+        '<ellipse cx="91" cy="113" rx="3.5" ry="3" fill="#fff"/>'+
+        '<circle cx="90" cy="114" r="1.8" fill="#1a2b08"/>'+
+        // gritted teeth mouth
+        '<rect x="68" y="126" width="24" height="7" fill="#fff" stroke="#1a2b08" stroke-width="1.5"/>'+
+        '<line x1="74" y1="126" x2="74" y2="133" stroke="#1a2b08" stroke-width="1"/>'+
+        '<line x1="80" y1="126" x2="80" y2="133" stroke="#1a2b08" stroke-width="1"/>'+
+        '<line x1="86" y1="126" x2="86" y2="133" stroke="#1a2b08" stroke-width="1"/>'+
+        // chest pec definition
+        '<path d="M60 148 Q80 154 100 148" stroke="#1a2b08" stroke-width="1.5" fill="none" opacity=".5"/>'+
+        '<line x1="80" y1="148" x2="80" y2="172" stroke="#1a2b08" stroke-width="1" opacity=".4"/>'+
+        '<path d="M62 165 Q70 168 75 168" stroke="#1a2b08" stroke-width="1" fill="none" opacity=".35"/>'+
+        '<path d="M98 165 Q90 168 85 168" stroke="#1a2b08" stroke-width="1" fill="none" opacity=".35"/>'+
+        '</g>'},
+];
+const SLOTS=[{id:'head',name:'Head'},{id:'face',name:'Face'},{id:'neck',name:'Neck'},{id:'body',name:'Body'},{id:'legs',name:'Legs'}];
+
+// lego builds: cost bricks, some give bonuses, some are cosmetic
+// type 'bonus': multiplies points. type 'cosmetic': shows a model beside the pickle.
+const legoBuilds=[
+  // bonus builds
+  {id:'lb_house',  icon:'\u{1F3E0}',name:'Lego House',      cost:10,  type:'bonus', mult:1.2,  desc:'+20% points'},
+  {id:'lb_car',    icon:'\u{1F697}',name:'Lego Car',        cost:25,  type:'bonus', mult:1.4,  desc:'+40% points'},
+  {id:'lb_tower',  icon:'\u{1F3EF}',name:'Lego Tower',      cost:60,  type:'bonus', mult:1.7,  desc:'+70% points'},
+  {id:'lb_castle', icon:'\u{1F3F0}',name:'Lego Castle',     cost:150, type:'bonus', mult:2.0,  desc:'\u00D72 points'},
+  {id:'lb_rocket', icon:'\u{1F680}',name:'Lego Rocket',     cost:400, type:'bonus', mult:2.5,  desc:'\u00D72.5 points'},
+  {id:'lb_city',   icon:'\u{1F3D9}\uFE0F',name:'Lego City', cost:1000,type:'bonus', mult:3.5,  desc:'\u00D73.5 points'},
+  // cosmetic builds — displayed beside the pickle
+  {id:'lb_flower', icon:'\u{1F337}',name:'Lego Flower',     cost:8,   type:'cosmetic', desc:'Decoration'},
+  {id:'lb_tree',   icon:'\u{1F332}',name:'Lego Tree',       cost:20,  type:'cosmetic', desc:'Decoration'},
+  {id:'lb_dog',    icon:'\u{1F415}',name:'Lego Dog',        cost:45,  type:'cosmetic', desc:'Companion'},
+  {id:'lb_dino',   icon:'\u{1F996}',name:'Lego Dino',       cost:120, type:'cosmetic', desc:'Cool display'},
+  {id:'lb_ship',   icon:'\u{1F6A2}',name:'Lego Ship',       cost:300, type:'cosmetic', desc:'Epic display'},
+  {id:'lb_robot',  icon:'\u{1F916}',name:'Lego Robot',      cost:800, type:'cosmetic', desc:'Legendary display'},
+];
+// brick trickle rate: base 1 per 10s, each bonus build built reduces interval
+function brickRate(){return Math.max(2,10-state.bricksBuilt.filter(id=>legoBuilds.find(b=>b.id===id&&b.type==='bonus')).length*1.5);}
+function legoBuildMult(){let m=1;state.bricksBuilt.forEach(id=>{const b=legoBuilds.find(x=>x.id===id);if(b&&b.type==='bonus')m*=b.mult;});return m;}
+
+// lego pets: bought with bricks, give ×1.5 each like regular pets, shown in the pet stage
+const legoPets=[
+  {id:'lp_cat',  icon:'\u{1F431}',name:'Lego Cat',    cost:12,  owned:false},
+  {id:'lp_dog',  icon:'\u{1F415}',name:'Lego Dog',    cost:25,  owned:false},
+  {id:'lp_parrot',icon:'\u{1F99C}',name:'Lego Parrot',cost:55,  owned:false},
+  {id:'lp_croc', icon:'\u{1F40A}',name:'Lego Croc',   cost:120, owned:false},
+  {id:'lp_rex',  icon:'\u{1F996}',name:'Lego T-Rex',  cost:250, owned:false},
+];
+function legoPetMult(){let m=1;legoPets.forEach(p=>{if(p.owned)m*=1.5;});return m;}
+
+// sprunky pets: bought with beats, give ×1.5 each, shown in pet stage
+const sprunkyPets=[
+  {id:'sp_worm',   icon:'\u{1F41B}',name:'Sprunky Worm',    cost:8,   owned:false},
+  {id:'sp_ghost',  icon:'\u{1F47B}',name:'Sprunky Ghost',   cost:20,  owned:false},
+  {id:'sp_alien',  icon:'\u{1F47D}',name:'Sprunky Alien',   cost:45,  owned:false},
+  {id:'sp_monster',icon:'\u{1F479}',name:'Sprunky Monster', cost:100, owned:false},
+];
+function sprunkyPetMult(){let m=1;sprunkyPets.forEach(p=>{if(p.owned)m*=1.5;});return m;}
+
+// google pets: bought with G-Coins, ×1.5 each
+const googlePets=[
+  {id:'gp_chrome',icon:'\u{1F4BB}',name:'Chrome Browser',cost:20, owned:false},
+  {id:'gp_yt',    icon:'\u25B6\uFE0F',name:'YouTube Bot',  cost:40, owned:false},
+  {id:'gp_dino',  icon:'\u{1F996}',name:'Chrome Dino',    cost:80, owned:false},
+  {id:'gp_maps',  icon:'\u{1F5FA}\uFE0F',name:'Maps Buddy',cost:150,owned:false},
+];
+function googlePetMult(){let m=1;googlePets.forEach(p=>{if(p.owned)m*=1.5;});return m;}
+const pets=[
+  {id:'frog', icon:'\u{1F438}',name:'Brine Frog',      cost:1000,   owned:false},
+  {id:'cat',  icon:'\u{1F431}',name:'Pickle Cat',      cost:3000,   owned:false},
+  {id:'duck', icon:'\u{1F986}',name:'Dill Duck',       cost:7000,   owned:false},
+  {id:'hog',  icon:'\u{1F994}',name:'Brine Hog',       cost:14000,  owned:false},
+  {id:'fox',  icon:'\u{1F98A}',name:'Sour Fox',        cost:25000,  owned:false},
+  {id:'owl',  icon:'\u{1F989}',name:'Wise Gherkin Owl',cost:40000,  owned:false},
+  {id:'drag', icon:'\u{1F432}',name:'Gherkin Dragon',  cost:60000,  owned:false},
+  {id:'uni',  icon:'\u{1F984}',name:'Pickle Unicorn',  cost:80000,  owned:false},
+  {id:'phx',  icon:'\u{1F525}',name:'Phoenix Pickle',  cost:95000,  owned:false},
+  {id:'alien',icon:'\u{1F47D}',name:'Cosmic Cuke',     cost:100000, owned:false},
+];
+
+const foes=[
+  {name:'Rival Gherkin',emoji:'\u{1F96C}',pow:3},
+  {name:'Sour Sammy',emoji:'\u{1F952}',pow:8},
+  {name:'Spicy Spear',emoji:'\u{1F336}\uFE0F',pow:20},
+  {name:'Big Dill',emoji:'\u{1F952}',pow:55},
+  {name:'Pickle Bandit',emoji:'\u{1F3AD}',pow:130},
+  {name:'Brine Golem',emoji:'\u{1F5FF}',pow:320},
+  {name:'Sir Cucumber',emoji:'\u{1F6E1}\uFE0F',pow:800},
+  {name:'Lord Brine',emoji:'\u{1F451}',pow:2000},
+  {name:'The Gherkinator',emoji:'\u{1F916}',pow:5500},
+  {name:'PICKLEZILLA',emoji:'\u{1F432}',pow:15000},
+];
+
+const $=id=>document.getElementById(id);
+function blend(h1,h2){
+  const p=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+  const a=p(h1),b=p(h2);
+  const m=i=>Math.round((a[i]+b[i])/2).toString(16).padStart(2,'0');
+  return '#'+m(0)+m(1)+m(2);
+}
+function wornColors(){
+  if(state.worn==='default')return DEFAULT_COLORS;
+  const sp=specialSkins.find(x=>x.id===state.worn);if(sp)return sp.colors;
+  const b=breeds.find(x=>x.id===state.worn);if(b)return b.colors;
+  const c=state.customs.find(x=>x.id===state.worn);if(c&&c.colors)return c.colors;
+  return DEFAULT_COLORS;
+}
+function applySkin(){
+  const c=wornColors();
+  $('pgA').setAttribute('stop-color',c[0]);
+  $('pgB').setAttribute('stop-color',c[1]);
+  $('pgC').setAttribute('stop-color',c[2]);
+  const ov=$('skinOverlay');
+  if(ov){
+    const sp=specialSkins.find(x=>x.id===state.worn);
+    ov.innerHTML = sp ? sp.overlay : '';
+  }
+  if(typeof checkEarned==='function')checkEarned();
+}
+function miniPickle(colors,gid){
+  return '<svg viewBox="0 0 160 240"><defs>'+
+    '<linearGradient id="'+gid+'" x1=".15" y1="0" x2=".9" y2=".5">'+
+    '<stop offset="0" stop-color="'+colors[0]+'"/><stop offset=".5" stop-color="'+colors[1]+'"/><stop offset="1" stop-color="'+colors[2]+'"/>'+
+    '</linearGradient>'+
+    '<radialGradient id="'+gid+'h" cx=".28" cy=".15" r=".55"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'+
+    '<clipPath id="'+gid+'c"><path d="M48 38 Q48 18 80 18 Q112 18 112 38 L112 208 Q112 226 80 226 Q48 226 48 208 Z"/></clipPath>'+
+    '</defs>'+
+    '<ellipse cx="80" cy="20" rx="32" ry="5" fill="#1a2b08"/>'+
+    '<ellipse cx="80" cy="19" rx="30" ry="3.5" fill="#3a5a14"/>'+
+    '<path d="M48 38 Q48 18 80 18 Q112 18 112 38 L112 208 Q112 226 80 226 Q48 226 48 208 Z" fill="url(#'+gid+')" stroke="#1a2b08" stroke-width="3"/>'+
+    '<g clip-path="url(#'+gid+'c)">'+
+    '<path d="M60 25 Q58 125 62 222" stroke="#1a2b08" stroke-width="1" fill="none" opacity=".25"/>'+
+    '<path d="M100 25 Q102 125 98 222" stroke="#1a2b08" stroke-width="1" fill="none" opacity=".25"/>'+
+    '<ellipse cx="66" cy="85" rx="20" ry="55" fill="url(#'+gid+'h)"/>'+
+    '<g fill="#1a2b08">'+
+      '<ellipse cx="62" cy="50" rx="2.2" ry="1.8"/><ellipse cx="95" cy="62" rx="2" ry="1.6"/>'+
+      '<ellipse cx="78" cy="80" rx="2.2" ry="1.8"/><ellipse cx="58" cy="100" rx="2" ry="1.6"/>'+
+      '<ellipse cx="100" cy="115" rx="2.2" ry="1.8"/><ellipse cx="72" cy="135" rx="2" ry="1.6"/>'+
+      '<ellipse cx="90" cy="155" rx="2.2" ry="1.8"/><ellipse cx="60" cy="170" rx="2" ry="1.6"/>'+
+      '<ellipse cx="98" cy="190" rx="2.2" ry="1.8"/><ellipse cx="74" cy="205" rx="2" ry="1.6"/>'+
+    '</g>'+
+    '</g></svg>';
+}
+function cost(item){return Math.floor(item.base*Math.pow(1.6,item.owned));}
+function typeMult(){
+  let m=1;
+  types.forEach(t=>{for(let i=0;i<t.owned;i++)m*=t.mult;});
+  state.customs.forEach(c=>{for(let i=0;i<c.owned;i++)m*=c.mult;});
+  return m;
+}
+function rebirthPointMult(){return 1+state.rebirth*0.5;}
+function petMult(){let m=1;pets.forEach(p=>{if(p.owned)m*=1.5;});return m;}
+function petCount(){return pets.filter(p=>p.owned).length;}
+function clickClassMult(){return state.cls==='clicker'?2:1;}
+function strength(){return Math.floor(state.baseStrength*typeMult());}
+function perClick(){return Math.floor(strength()*rebirthPointMult()*petMult()*legoPetMult()*sprunkyPetMult()*googlePetMult()*clickClassMult()*legoBuildMult()*(state.multi?2:1));}
+// rebirth: 10k more each time; first = 10k
+function rebirthCost(){return 10000*(state.rebirth+1);}
+function canRebirth(){return state.score>=rebirthCost();}
+function tokensPerRebirth(){return (1+state.rebirth)*(state.cls==='brewer'?2:1);} // more than 1 per rebirth; Brewer doubles
+
+// ---- crafting costs ----
+// ---- crafting costs (Brewer class gets a discount) ----
+const SIZE_COST_TOK_BASE=2;
+const DNA_COST_SIZE_BASE=3;
+function sizeCostTok(){return state.cls==='brewer'?2:2;}      // tokens per size (Brewer keeps 2 but...)
+function dnaCostSize(){return state.cls==='brewer'?2:3;}      // Brewer: 2 size per DNA instead of 3
+const BREED_MIX_DNA=4;
+
+// ---------- SAVE / LOAD ----------
+function save(silent){
+  const data={
+    score:state.score,baseStrength:state.baseStrength,rebirth:state.rebirth,
+    foeIdx:state.foeIdx,maxFoe:state.maxFoe,multi:state.multi,name:state.name,
+    tokens:state.tokens,size:state.size,dna:state.dna,
+    breedsOwned:state.breedsOwned,customs:state.customs,worn:state.worn,cls:state.cls,
+    up:upgrades.map(u=>u.owned),ty:types.map(t=>t.owned),pets:pets.map(p=>p.owned),
+    outfit:state.outfit,clothing:clothing.map(c=>c.owned),totalClicks:state.totalClicks,offlineSeconds:state.offlineSeconds,earned:state.earned,
+    bricks:state.bricks,bricksBuilt:state.bricksBuilt,legoPetsOwned:state.legoPetsOwned,
+    beats:state.beats,sprunkyPetsOwned:state.sprunkyPetsOwned,
+    gcoins:state.gcoins,googlePetsOwned:state.googlePetsOwned
+  };
+  try{localStorage.setItem(SAVE_KEY,JSON.stringify(data));if(!silent)flashSave('Saved!');}
+  catch(e){if(!silent)flashSave('Save failed (storage off)');}
+}
+function load(silent){
+  try{
+    const raw=localStorage.getItem(SAVE_KEY);
+    if(!raw){if(!silent)flashSave('No save found');return false;}
+    const d=JSON.parse(raw);
+    state.score=d.score||0;state.baseStrength=d.baseStrength||1;state.rebirth=d.rebirth||0;
+    state.foeIdx=d.foeIdx||0;state.maxFoe=d.maxFoe||0;state.name=d.name||'Sir Picklesworth';
+    state.multi=d.multi&&state.rebirth>=10?d.multi:false;
+    state.tokens=d.tokens||0;state.size=d.size||0;state.dna=d.dna||0;
+    state.breedsOwned=d.breedsOwned||[];state.customs=d.customs||[];state.worn=d.worn||'default';state.cls=d.cls||null;
+    (d.up||[]).forEach((v,i)=>{if(upgrades[i])upgrades[i].owned=v;});
+    (d.ty||[]).forEach((v,i)=>{if(types[i])types[i].owned=v;});
+    (d.pets||[]).forEach((v,i)=>{if(pets[i])pets[i].owned=v;});
+    (d.clothing||[]).forEach((v,i)=>{if(clothing[i])clothing[i].owned=v;});
+    if(d.outfit)state.outfit=Object.assign({head:null,face:null,neck:null,body:null,legs:null},d.outfit);
+    state.totalClicks=d.totalClicks||0;state.offlineSeconds=d.offlineSeconds||0;state.earned=d.earned||[];
+    state.bricks=d.bricks||0;state.bricksBuilt=d.bricksBuilt||[];
+    state.legoPetsOwned=d.legoPetsOwned||[];
+    state.legoPetsOwned.forEach(id=>{const p=legoPets.find(x=>x.id===id);if(p)p.owned=true;});
+    state.beats=d.beats||0;state.sprunkyPetsOwned=d.sprunkyPetsOwned||[];
+    state.sprunkyPetsOwned.forEach(id=>{const p=sprunkyPets.find(x=>x.id===id);if(p)p.owned=true;});
+    state.gcoins=d.gcoins||0;state.googlePetsOwned=d.googlePetsOwned||[];
+    state.googlePetsOwned.forEach(id=>{const p=googlePets.find(x=>x.id===id);if(p)p.owned=true;});
+    currentFoe=loadFoe();applyMultiUI();render();if(!silent)flashSave('Loaded!');return true;
+  }catch(e){if(!silent)flashSave('Load failed');return false;}
+}
+function wipe(){
+  if(!confirm('Reset ALL progress? This cannot be undone.'))return;
+  localStorage.removeItem(SAVE_KEY);
+  Object.assign(state,{score:0,baseStrength:1,rebirth:0,foeIdx:0,maxFoe:0,multi:false,name:'Sir Picklesworth',
+    tokens:0,size:0,dna:0,breedsOwned:[],customs:[],worn:'default',cls:null,bs1:null,bs2:null});
+  upgrades.forEach(u=>u.owned=0);types.forEach(t=>t.owned=0);pets.forEach(p=>p.owned=false);clothing.forEach(c=>c.owned=false);
+  state.outfit={head:null,face:null,neck:null,body:null,legs:null};
+  state.totalClicks=0;state.offlineSeconds=0;state.earned=[];
+  state.bricks=0;state.bricksBuilt=[];state.legoPetsOwned=[];
+  legoPets.forEach(p=>p.owned=false);
+  state.beats=0;state.sprunkyPetsOwned=[];sprunkyPets.forEach(p=>p.owned=false);
+  state.gcoins=0;state.googlePetsOwned=[];googlePets.forEach(p=>p.owned=false);
+  currentFoe=loadFoe();applyMultiUI();render();flashSave('Reset done');
+}
+let flashTimer;
+function flashSave(msg){$('saveTag').textContent=msg;clearTimeout(flashTimer);flashTimer=setTimeout(()=>{$('saveTag').textContent='Auto-saves on';},1800);}
+
+// ---------- RENDER ----------
+function render(){
+  $('pnameText').textContent=state.name;
+  $('myFighterName').textContent=state.name.toUpperCase();
+  $('score').textContent=Math.floor(state.score).toLocaleString();
+  $('strength').textContent=strength().toLocaleString();
+  $('perClick').textContent=perClick().toLocaleString();
+  $('myPow').textContent=strength().toLocaleString();
+  $('rebirthTag').textContent='REBIRTH '+state.rebirth;
+  $('curTok').textContent=state.tokens;$('curSize').textContent=state.size;$('curDna').textContent=state.dna;
+  if($('curBricks'))$('curBricks').textContent=Math.floor(state.bricks);
+  if($('curBeats'))$('curBeats').textContent=Math.floor(state.beats);
+  if($('curGcoins'))$('curGcoins').textContent=state.gcoins;
+
+  // worn skin label
+  let wname='Classic Pickle';
+  if(state.worn!=='default'){
+    const b=breeds.find(x=>x.id===state.worn);
+    const c=state.customs.find(x=>x.id===state.worn);
+    wname=(b?b.name+' Breed':(c?c.name:'Classic Pickle'));
+  }
+  $('wornNote').innerHTML='Wearing: <b>'+wname+'</b>'+(state.worn!=='default'?' &nbsp;<button class="reset-skin" id="resetSkin">Back to Classic</button>':'');
+  if(state.worn!=='default'){$('resetSkin').onclick=()=>{state.worn='default';applySkin();render();save(true);};}
+  applySkin();
+
+  let parts=['Rebirth \u00D7'+rebirthPointMult().toFixed(1)];
+  if(petCount())parts.push('Pets \u00D7'+petMult().toFixed(2));
+  if(state.cls){const cc=classes.find(c=>c.id===state.cls);if(cc)parts.push('Class: '+cc.name);}
+  if(state.multi)parts.push('Multiplayer \u00D72');
+  $('multLine').textContent='Point multipliers: '+parts.join('  \u2022  ');
+
+  const rc=rebirthCost();
+  $('rebirthBtn').disabled=!canRebirth();
+  $('rebirthBtn').textContent=canRebirth()?('REBIRTH (+'+tokensPerRebirth()+' \u{1F689}, +0.5\u00D7)'):('REBIRTH @ '+rc.toLocaleString()+' pts');
+  $('rebirthNote').textContent='Cost rises 10,000 each rebirth. Each rebirth: +0.5\u00D7 points and +'+tokensPerRebirth()+' Brine Tokens.';
+
+  renderShop('shop',upgrades,buyUpgrade,'pts');
+  renderClasses();
+  renderDressing();
+  renderClothing();
+  applyOutfit();
+  renderPets();
+  renderLegoCenter();
+  renderSprunkySongRoom();
+  renderGoogleGamesZone();
+  renderTypes();
+  renderCraft();
+  renderBreed();
+
+  const mb=$('multiBtn');
+  if(state.rebirth>=10){mb.classList.remove('locked');if(!state.multi)mb.textContent='\u{1F465} Multiplayer (2\u00D7)';}
+  else{mb.classList.add('locked');mb.textContent='\u{1F512} Multiplayer (R10)';
+    if(state.multi){state.multi=false;$('multiBanner').classList.remove('show');mb.classList.remove('active');$('soloBtn').classList.add('active');}}
+
+  $('battleProg').textContent='Rivals defeated: '+state.maxFoe+'/'+foes.length;
+}
+
+function renderClasses(){
+  const box=$('classBody');box.innerHTML='';
+  classes.forEach(c=>{
+    const sel=state.cls===c.id;
+    const el=document.createElement('div');
+    el.className='cls-card'+(sel?' sel':'');
+    el.innerHTML='<div class="cls-emoji">'+c.icon+'</div>'+
+      '<div class="cls-name">'+c.name+'</div>'+
+      '<div class="cls-desc">'+c.desc+'</div>'+
+      '<div class="cls-active">'+(sel?'\u2713 Active':'')+'</div>';
+    el.onclick=()=>{state.cls=sel?null:c.id;render();save(true);};
+    box.appendChild(el);
+  });
+}
+function renderShop(elId,list,handler,cur){
+  const box=$(elId);box.innerHTML='';
+  list.forEach(item=>{
+    if(item.minR>state.rebirth)return;
+    const c=cost(item);const can=state.score>=c;
+    const el=document.createElement('div');
+    el.className='shop-item'+(can?'':' cant');
+    el.innerHTML='<div class="shop-icon">'+item.icon+'</div>'+
+      '<div class="shop-info"><div class="shop-name">'+item.name+' <span class="shop-owned">\u00D7'+item.owned+'</span></div>'+
+      '<div class="shop-desc">+'+item.add+' strength</div></div>'+
+      '<div class="shop-cost">'+c.toLocaleString()+'</div>';
+    el.onclick=()=>handler(item);
+    box.appendChild(el);
+  });
+}
+
+function checkEarned(){
+  let any=false;
+  specialSkins.forEach(s=>{
+    if(s.earn&&!state.earned.includes(s.id)){
+      const r=s.earn;
+      let met=false;
+      if(r.type==='clicks'&&state.totalClicks>=r.value)met=true;
+      else if(r.type==='offline'&&state.offlineSeconds>=r.value)met=true;
+      else if(r.type==='wear'&&state.worn===r.skinId)met=true;
+      if(met){
+        state.earned.push(s.id);any=true;
+        $('battleLog').innerHTML='\u{1F389} You earned the <b>'+s.name+'</b> skin! Equip it in the Dressing Room.';
+      }
+    }
+  });
+  if(any)save(true);
+}
+function skinIsEarned(s){return !s.earn||state.earned.includes(s.id);}
+function earnText(s){
+  if(!s.earn)return '';
+  const r=s.earn;
+  if(r.type==='clicks')return 'Click '+r.value.toLocaleString()+'\u00D7 ('+Math.min(state.totalClicks,r.value).toLocaleString()+'/'+r.value.toLocaleString()+')';
+  if(r.type==='offline')return 'Play offline '+r.value+'s ('+Math.min(state.offlineSeconds,r.value)+'/'+r.value+')';
+  if(r.type==='wear'){const t=breeds.find(b=>b.id===r.skinId);return 'Wear '+(t?t.name:r.skinId);}
+  if(r.type==='dna')return 'Unlock in Brine Lab ('+r.value+' \u{1F9EC})';
+  if(r.type==='bricks')return 'Unlock in Lego Builds Center ('+r.value+' \u{1F9F1})';
+  if(r.type==='beats')return 'Unlock in Sprunky Song Room ('+r.value+' \u{1F3B5})';
+  if(r.type==='gcoins')return 'Unlock in Google Games Zone ('+r.value+' \uD83E\uDE99)';
+  return 'Locked';
+}
+function renderDressing(){
+  const box=$('dressingBody');box.innerHTML='';
+  const skins=[{id:'default',name:'Classic',tag:'Starter',colors:DEFAULT_COLORS,owned:true}];
+  specialSkins.forEach(s=>skins.push({id:s.id,name:s.name,tag:s.tag,colors:s.colors,owned:skinIsEarned(s),earnText:skinIsEarned(s)?null:earnText(s)}));
+  breeds.forEach(b=>skins.push({id:b.id,name:b.name,tag:'Breed',colors:b.colors,owned:state.breedsOwned.includes(b.id)}));
+  state.customs.forEach(c=>{if(c.colors)skins.push({id:c.id,name:c.name,tag:'Hybrid',colors:c.colors,owned:c.owned>0});});
+  skins.forEach((s,i)=>{
+    const worn=state.worn===s.id;
+    const el=document.createElement('div');
+    el.className='dr-card'+(worn?' worn':'')+(s.owned?'':' locked');
+    const tagText=worn?'\u2713 Worn':(s.owned?s.tag:(s.earnText||'Locked'));
+    el.innerHTML=miniPickle(s.colors,'dg'+i)+
+      '<div class="dr-name">'+s.name+'</div>'+
+      '<div class="dr-tag">'+tagText+'</div>';
+    if(s.owned)el.onclick=()=>{state.worn=s.id;applySkin();render();save(true);};
+    box.appendChild(el);
+  });
+}
+function applyOutfit(){
+  const layer=$('outfitLayer');if(!layer)return;
+  const sp=specialSkins.find(x=>x.id===state.worn);
+  if(sp&&(sp.noClothing||sp.tag==='Sprunky')){layer.innerHTML='';return;}
+  let svg='';
+  SLOTS.forEach(s=>{
+    const id=state.outfit[s.id];if(!id)return;
+    const it=clothing.find(c=>c.id===id);if(!it)return;
+    if(it.svg) svg+=it.svg;
+    else svg+='<text x="'+it.x+'" y="'+it.y+'" text-anchor="middle" dominant-baseline="middle" font-size="'+it.size+'">'+it.icon+'</text>';
+  });
+  layer.innerHTML=svg;
+}
+function renderClothing(){
+  const box=$('clothingBody');box.innerHTML='';
+  const sp=specialSkins.find(x=>x.id===state.worn);
+  if(sp&&(sp.noClothing||sp.tag==='Sprunky')){
+    const note=document.createElement('div');
+    note.className='lock-msg';
+    note.innerHTML='\u{1F512} <b>'+sp.name+'</b> can\u2019t wear clothing. Items below are still purchasable but stay hidden until you switch skins.';
+    box.appendChild(note);
+  }
+  SLOTS.forEach(slot=>{
+    const header=document.createElement('div');
+    header.style.cssText='font-size:11px;color:#7a9050;margin:6px 0 4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;';
+    header.textContent=slot.name;
+    box.appendChild(header);
+    clothing.filter(c=>c.slot===slot.id).forEach(c=>{
+      const can=!c.owned&&state.score>=c.cost;
+      const wornNow=state.outfit[slot.id]===c.id;
+      const el=document.createElement('div');
+      el.className='shop-item'+((c.owned||can)?'':' cant');
+      el.innerHTML='<div class="shop-icon">'+c.icon+'</div>'+
+        '<div class="shop-info"><div class="shop-name">'+c.name+' '+(c.owned?'<span class="shop-owned">OWNED</span>':'')+'</div>'+
+        '<div class="shop-desc">'+slot.name+' slot</div></div>'+
+        (c.owned
+          ? '<button class="wear-btn'+(wornNow?' on':'')+'">'+(wornNow?'Worn':'Wear')+'</button>'
+          : '<div class="shop-cost">'+c.cost.toLocaleString()+'</div>');
+      if(c.owned){
+        el.querySelector('.wear-btn').onclick=(ev)=>{
+          ev.stopPropagation();
+          state.outfit[slot.id]=wornNow?null:c.id;
+          applyOutfit();render();save(true);
+        };
+      }else{
+        el.onclick=()=>{if(state.score<c.cost)return;state.score-=c.cost;c.owned=true;render();save(true);};
+      }
+      box.appendChild(el);
+    });
+  });
+}
+function renderPets(){
+  const box=$('petsBody');box.innerHTML='';
+  pets.forEach(p=>{
+    const can=!p.owned&&state.score>=p.cost;
+    const el=document.createElement('div');
+    el.className='shop-item'+((p.owned||can)?'':' cant');
+    el.innerHTML='<div class="shop-icon">'+p.icon+'</div>'+
+      '<div class="shop-info"><div class="shop-name">'+p.name+' '+(p.owned?'<span class="shop-owned">OWNED</span>':'')+'</div>'+
+      '<div class="shop-desc">\u00D71.5 points (stacks)</div></div>'+
+      '<div class="shop-cost">'+(p.owned?'\u2713':p.cost.toLocaleString())+'</div>';
+    if(!p.owned)el.onclick=()=>{if(state.score<p.cost)return;state.score-=p.cost;p.owned=true;render();save(true);};
+    box.appendChild(el);
+  });
+  // pets standing beside pickle
+  const stage=$('petStage');stage.innerHTML='';
+  pets.forEach(p=>{if(p.owned){const s=document.createElement('span');s.className='pet';s.textContent=p.icon;s.title=p.name;stage.appendChild(s);}});
+  legoPets.forEach(p=>{if(p.owned){const s=document.createElement('span');s.className='pet';s.textContent=p.icon;s.title=p.name+' (Lego)';stage.appendChild(s);}});
+  sprunkyPets.forEach(p=>{if(p.owned){const s=document.createElement('span');s.className='pet';s.textContent=p.icon;s.title=p.name+' (Sprunky)';stage.appendChild(s);}});
+  googlePets.forEach(p=>{if(p.owned){const s=document.createElement('span');s.className='pet';s.textContent=p.icon;s.title=p.name+' (Google)';stage.appendChild(s);}});
+}
+function renderLegoCenter(){
+  const box=$('legoBody');if(!box)return;box.innerHTML='';
+  // rate display
+  const rate=document.createElement('div');
+  rate.style.cssText='font-size:12px;color:#e8c84a;font-weight:700;margin-bottom:10px;';
+  rate.textContent='\u{1F9F1} '+Math.floor(state.bricks)+' bricks  \u2022  +1 every '+brickRate().toFixed(0)+'s';
+  box.appendChild(rate);
+  // section headers
+  ['bonus','cosmetic'].forEach(type=>{
+    const hdr=document.createElement('div');
+    hdr.style.cssText='font-size:11px;color:#7a9050;margin:8px 0 4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;';
+    hdr.textContent=type==='bonus'?'BONUS BUILDS (point multipliers)':'COSMETIC BUILDS (decorations)';
+    box.appendChild(hdr);
+    legoBuilds.filter(b=>b.type===type).forEach(b=>{
+      const built=state.bricksBuilt.includes(b.id);
+      const can=!built&&state.bricks>=b.cost;
+      const el=document.createElement('div');
+      el.className='shop-item'+((built||can)?'':' cant');
+      el.innerHTML='<div class="shop-icon">'+b.icon+'</div>'+
+        '<div class="shop-info"><div class="shop-name">'+b.name+' '+(built?'<span class="shop-owned">BUILT</span>':'')+'</div>'+
+        '<div class="shop-desc">'+b.desc+'</div></div>'+
+        '<div class="shop-cost" style="color:#e8c84a;">'+(built?'\u2713':b.cost+' \u{1F9F1}')+'</div>';
+      if(!built)el.onclick=()=>{
+        if(state.bricks<b.cost)return;
+        state.bricks-=b.cost;
+        state.bricksBuilt.push(b.id);
+        render();save(true);
+      };
+      box.appendChild(el);
+    });
+  });
+  // lego pets section
+  const petHdr=document.createElement('div');
+  petHdr.style.cssText='font-size:11px;color:#7a9050;margin:10px 0 4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;';
+  petHdr.textContent='LEGO PETS (\u00D71.5 each, stack with regular pets)';box.appendChild(petHdr);
+  legoPets.forEach(p=>{
+    const can=!p.owned&&state.bricks>=p.cost;
+    const el=document.createElement('div');
+    el.className='shop-item'+((p.owned||can)?'':' cant');
+    el.innerHTML='<div class="shop-icon">'+p.icon+'</div>'+
+      '<div class="shop-info"><div class="shop-name">'+p.name+' '+(p.owned?'<span class="shop-owned">OWNED</span>':'')+'</div>'+
+      '<div class="shop-desc">\u00D71.5 points \u2022 stands beside your pickle</div></div>'+
+      '<div class="shop-cost" style="color:#e8c84a;">'+(p.owned?'\u2713':p.cost+' \u{1F9F1}')+'</div>';
+    if(!p.owned)el.onclick=()=>{
+      if(state.bricks<p.cost)return;
+      state.bricks-=p.cost;p.owned=true;
+      if(!state.legoPetsOwned.includes(p.id))state.legoPetsOwned.push(p.id);
+      render();save(true);
+    };
+    box.appendChild(el);
+  });
+  // unlock skins with bricks
+  const brickSkins=specialSkins.filter(s=>s.earn&&s.earn.type==='bricks');
+  if(brickSkins.length){
+    const sep=document.createElement('div');
+    sep.style.cssText='font-size:11px;color:#7a9050;margin:10px 0 4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;';
+    sep.textContent='UNLOCK SKINS (spend Bricks):';box.appendChild(sep);
+    brickSkins.forEach(s=>{
+      const owned=state.earned.includes(s.id);
+      const can=!owned&&state.bricks>=s.earn.value;
+      const el=document.createElement('div');
+      el.className='shop-item'+((owned||can)?'':' cant');
+      el.innerHTML='<div class="shop-icon">'+s.icon+'</div>'+
+        '<div class="shop-info"><div class="shop-name">'+s.name+' '+(owned?'<span class="shop-owned">OWNED</span>':'')+'</div>'+
+        '<div class="shop-desc">Special skin for the Dressing Room</div></div>'+
+        '<div class="shop-cost" style="color:#e8c84a;">'+(owned?'\u2713':s.earn.value+' \u{1F9F1}')+'</div>';
+      if(!owned)el.onclick=()=>{
+        if(state.bricks<s.earn.value)return;
+        state.bricks-=s.earn.value;
+        state.earned.push(s.id);
+        $('battleLog').innerHTML='\u{1F389} Unlocked <b>'+s.name+'</b> skin! Equip it in the Dressing Room.';
+        render();save(true);
+      };
+      box.appendChild(el);
+    });
+  }
+  // cosmetic display row
+  const disp=$('legoDisplay');if(disp){
+    disp.textContent=legoBuilds.filter(b=>b.type==='cosmetic'&&state.bricksBuilt.includes(b.id)).map(b=>b.icon).join(' ');
+  }
+}
+function renderTypes(){
+  const box=$('typesBody');box.innerHTML='';
+  const all=types.concat(state.customs);
+  all.forEach(item=>{
+    const isCustom=item.base===undefined;
+    const c=isCustom?customCost(item):cost(item);
+    const can=state.score>=c;
+    const el=document.createElement('div');
+    el.className='shop-item'+(can?'':' cant');
+    const skinId=item.id;
+    const canWear=item.owned>0&&item.colors; // only custom hybrids carry colors
+    const wornNow=state.worn===skinId;
+    el.innerHTML='<div class="shop-icon">'+item.icon+'</div>'+
+      '<div class="shop-info"><div class="shop-name">'+item.name+(isCustom?' \u2728':'')+' <span class="shop-owned">\u00D7'+item.owned+'</span></div>'+
+      '<div class="shop-desc">\u00D7'+item.mult+' permanent points</div></div>'+
+      (canWear?'<button class="wear-btn'+(wornNow?' on':'')+'">'+(wornNow?'Worn':'Wear')+'</button>':'')+
+      '<div class="shop-cost">'+c.toLocaleString()+'</div>';
+    if(canWear){
+      el.querySelector('.wear-btn').onclick=(ev)=>{ev.stopPropagation();state.worn=wornNow?'default':skinId;applySkin();render();save(true);};
+    }
+    el.onclick=()=>isCustom?buyCustom(item):buyType(item);
+    box.appendChild(el);
+  });
+}
+function customCost(c){return Math.floor(c.baseCost*Math.pow(1.7,c.owned));}
+
+function renderCraft(){
+  const box=$('craftBody');box.innerHTML='';
+  const sc=sizeCostTok(), dc=dnaCostSize();
+  // convert tokens->size
+  box.appendChild(craftRow('\u128208','Grow Size','Convert '+sc+' Tokens \u2192 1 Size',state.tokens>=sc,()=>{
+    if(state.tokens<sc)return;state.tokens-=sc;state.size++;render();save(true);
+  }, sc+' \u{1F689}'));
+  // convert size->dna
+  box.appendChild(craftRow('\u129516','Extract DNA','Convert '+dc+' Size \u2192 1 DNA',state.size>=dc,()=>{
+    if(state.size<dc)return;state.size-=dc;state.dna++;render();save(true);
+  }, dc+' \u{1F4D0}'));
+  // separator
+  const sep=document.createElement('div');sep.style.cssText='font-size:11px;color:#7a9050;margin:8px 0 4px;font-weight:700;';
+  sep.textContent='UNLOCK BREEDS (spend DNA):';box.appendChild(sep);
+  breeds.forEach(b=>{
+    const owned=state.breedsOwned.includes(b.id);
+    const can=!owned&&state.dna>=b.cost;
+    const el=document.createElement('div');
+    el.className='shop-item'+((owned||can)?'':' cant');
+    const wornNow=state.worn===b.id;
+    el.innerHTML='<div class="shop-icon">'+b.icon+'</div>'+
+      '<div class="shop-info"><div class="shop-name">'+b.name+' Breed '+(owned?'<span class="shop-owned">OWNED</span>':'')+'</div>'+
+      '<div class="shop-desc">mix factor \u00D7'+b.mult+'</div></div>'+
+      (owned
+        ? '<button class="wear-btn'+(wornNow?' on':'')+'">'+(wornNow?'Worn':'Wear')+'</button>'
+        : '<div class="shop-cost dna">'+b.cost+' \u{1F9EC}</div>');
+    if(owned){
+      el.querySelector('.wear-btn').onclick=(ev)=>{ev.stopPropagation();state.worn=wornNow?'default':b.id;applySkin();render();save(true);};
+    }else{
+      el.onclick=()=>{if(state.dna<b.cost)return;state.dna-=b.cost;state.breedsOwned.push(b.id);render();save(true);};
+    }
+    box.appendChild(el);
+  });
+  // unlock special skins with DNA
+  const dnaSkins=specialSkins.filter(s=>s.earn&&s.earn.type==='dna');
+  if(dnaSkins.length){
+    const sep2=document.createElement('div');
+    sep2.style.cssText='font-size:11px;color:#7a9050;margin:10px 0 4px;font-weight:700;';
+    sep2.textContent='UNLOCK SKINS (spend DNA):';box.appendChild(sep2);
+    dnaSkins.forEach(s=>{
+      const owned=state.earned.includes(s.id);
+      const can=!owned&&state.dna>=s.earn.value;
+      const el=document.createElement('div');
+      el.className='shop-item'+((owned||can)?'':' cant');
+      el.innerHTML='<div class="shop-icon">'+s.icon+'</div>'+
+        '<div class="shop-info"><div class="shop-name">'+s.name+' '+(owned?'<span class="shop-owned">OWNED</span>':'')+'</div>'+
+        '<div class="shop-desc">Special skin for the Dressing Room</div></div>'+
+        '<div class="shop-cost dna">'+(owned?'\u2713':s.earn.value+' \u{1F9EC}')+'</div>';
+      if(!owned)el.onclick=()=>{
+        if(state.dna<s.earn.value)return;
+        state.dna-=s.earn.value;
+        state.earned.push(s.id);
+        $('battleLog').innerHTML='\u{1F389} Unlocked <b>'+s.name+'</b> skin! Equip it in the Dressing Room.';
+        render();save(true);
+      };
+      box.appendChild(el);
+    });
+  }
+}
+function craftRow(icon,name,desc,can,handler,costLabel){
+  const el=document.createElement('div');
+  el.className='shop-item'+(can?'':' cant');
+  el.innerHTML='<div class="shop-icon">'+icon+'</div>'+
+    '<div class="shop-info"><div class="shop-name">'+name+'</div><div class="shop-desc">'+desc+'</div></div>'+
+    '<div class="shop-cost dna">'+costLabel+'</div>';
+  el.onclick=handler;return el;
+}
+
+function renderBreed(){
+  const box=$('breedBody');box.innerHTML='';
+  const owned=breeds.filter(b=>state.breedsOwned.includes(b.id));
+  if(owned.length<2){
+    box.innerHTML='<div class="lock-msg">Unlock at least 2 breeds in the Brine Lab to start mixing.</div>';
+    return;
+  }
+  // two slots
+  const pick=document.createElement('div');pick.className='breed-pick';
+  pick.appendChild(slot(state.bs1,1));pick.appendChild(slot(state.bs2,2));
+  box.appendChild(pick);
+  // chooser
+  const chooser=document.createElement('div');chooser.className='chooser';
+  owned.forEach(b=>{
+    const o=document.createElement('div');o.className='opt';
+    o.textContent=b.icon+' '+b.name;
+    o.onclick=()=>{
+      if(state.bs1===null)state.bs1=b.id;
+      else if(state.bs2===null&&b.id!==state.bs1)state.bs2=b.id;
+      else {state.bs1=b.id;state.bs2=null;}
+      render();
+    };
+    chooser.appendChild(o);
+  });
+  box.appendChild(chooser);
+  const ready=state.bs1&&state.bs2;
+  const btn=document.createElement('button');btn.className='breed-btn';
+  btn.disabled=!(ready&&state.dna>=BREED_MIX_DNA);
+  btn.textContent=ready?('MIX! ('+BREED_MIX_DNA+' \u{1F9EC})'):'Select two breeds';
+  btn.onclick=doMix;box.appendChild(btn);
+  if(state.customs.length){
+    const lbl=document.createElement('div');lbl.className='breed-owned';
+    lbl.textContent='Custom pickles created: '+state.customs.map(c=>c.icon).join(' ');
+    box.appendChild(lbl);
+  }
+}
+function slot(id,n){
+  const b=breeds.find(x=>x.id===id);
+  const el=document.createElement('div');
+  el.className='breed-slot'+(b?' filled':'');
+  el.innerHTML=b?('<div class="be">'+b.icon+'</div>'+b.name):('Slot '+n);
+  el.onclick=()=>{if(n===1)state.bs1=null;else state.bs2=null;render();};
+  return el;
+}
+function doMix(){
+  if(!(state.bs1&&state.bs2)||state.dna<BREED_MIX_DNA)return;
+  state.dna-=BREED_MIX_DNA;
+  const a=breeds.find(x=>x.id===state.bs1),b=breeds.find(x=>x.id===state.bs2);
+  const mult=Math.round(a.mult*b.mult*10)/10;
+  const id='c_'+a.id+'_'+b.id+'_'+Date.now();
+  const name=a.name+'-'+b.name+' Hybrid';
+  const colors=[blend(a.colors[0],b.colors[0]),blend(a.colors[1],b.colors[1]),blend(a.colors[2],b.colors[2])];
+  state.customs.push({id,name,icon:a.icon+b.icon,mult,baseCost:Math.floor(500000*mult),owned:0,colors});
+  state.bs1=null;state.bs2=null;
+  render();save(true);
+  $('battleLog').innerHTML='\u2728 Bred a new custom pickle: <b>'+name+'</b> (\u00D7'+mult+')! Buy it in the Types shop.';
+}
+
+function buyUpgrade(u){const c=cost(u);if(state.score<c)return;state.score-=c;u.owned++;state.baseStrength+=u.add;render();save(true);}
+function buyType(t){const c=cost(t);if(state.score<c)return;state.score-=c;t.owned++;render();save(true);}
+function buyCustom(c){const cc=customCost(c);if(state.score<cc)return;state.score-=cc;c.owned++;render();save(true);}
+
+const wrap=$('pickleWrap');
+wrap.addEventListener('pointerdown',e=>{
+  const gain=perClick();state.score+=gain;state.totalClicks++;checkEarned();
+  wrap.classList.add('mega');setTimeout(()=>wrap.classList.remove('mega'),400);
+  const f=document.createElement('div');f.className='float';f.textContent='+'+gain.toLocaleString();
+  const r=wrap.getBoundingClientRect();
+  f.style.left=(e.clientX-r.left)+'px';f.style.top=(e.clientY-r.top)+'px';
+  wrap.appendChild(f);setTimeout(()=>f.remove(),1000);render();
+});
+
+$('rebirthBtn').onclick=()=>{
+  if(!canRebirth())return;
+  const gained=tokensPerRebirth();
+  state.rebirth++;state.tokens+=gained;state.score=0;state.baseStrength=1;
+  upgrades.forEach(u=>u.owned=0);
+  render();save(true);
+  $('battleLog').textContent='\u2728 REBIRTH '+state.rebirth+'! +'+gained+' Tokens, now \u00D7'+rebirthPointMult().toFixed(1)+' points.';
+};
+
+$('saveBtn').onclick=()=>save(false);
+$('loadBtn').onclick=()=>load(false);
+$('wipeBtn').onclick=wipe;
+
+function startRename(){
+  const row=$('pnameRow');
+  row.innerHTML='<input class="pname-input" id="pnameInput" maxlength="20" value="'+state.name.replace(/"/g,'&quot;')+'"/>'+
+    '<button class="pname-edit" id="pnameSave" title="Save name">\u2705</button>';
+  const input=$('pnameInput');input.focus();input.select();
+  function commit(){state.name=input.value.trim()||'Sir Picklesworth';bindRename();save(true);}
+  $('pnameSave').onclick=commit;
+  input.addEventListener('keydown',e=>{if(e.key==='Enter')commit();if(e.key==='Escape')bindRename();});
+}
+function bindRename(){
+  const row=$('pnameRow');
+  row.innerHTML='<span class="pname" id="pnameText" title="Click to rename"></span>'+
+    '<button class="pname-edit" id="pnameEdit" title="Rename">\u270F\uFE0F</button>';
+  $('pnameText').onclick=startRename;$('pnameEdit').onclick=startRename;render();
+}
+$('pnameText').onclick=startRename;
+$('pnameEdit').onclick=startRename;
+
+function applyMultiUI(){
+  if(state.multi&&state.rebirth>=10){$('multiBtn').classList.add('active');$('soloBtn').classList.remove('active');$('multiBanner').classList.add('show');}
+  else{$('multiBtn').classList.remove('active');$('soloBtn').classList.add('active');$('multiBanner').classList.remove('show');}
+}
+$('soloBtn').onclick=()=>{state.multi=false;applyMultiUI();render();save(true);};
+$('multiBtn').onclick=()=>{
+  if(state.rebirth<10){$('battleLog').textContent='\u{1F512} Multiplayer unlocks at Rebirth 10!';return;}
+  state.multi=true;applyMultiUI();render();save(true);
+};
+
+function loadFoe(){
+  const f=foes[Math.min(state.foeIdx,foes.length-1)];
+  $('foeName').textContent=f.name;$('foeEmoji').textContent=f.emoji;$('foePow').textContent=f.pow.toLocaleString();
+  $('foeHp').style.width='100%';$('myHp').style.width='100%';return f;
+}
+let currentFoe=loadFoe();
+$('fightBtn').onclick=()=>{
+  if(state.inBattle)return;
+  if(state.score<50){$('battleLog').textContent='Not enough points! You need 50 to enter the arena.';return;}
+  state.score-=50;render();state.inBattle=true;$('fightBtn').disabled=true;
+  let myHp=100,foeHp=100;const f=currentFoe;const log=$('battleLog');log.innerHTML='\u2694\uFE0F Battle begins!';
+  const tick=setInterval(()=>{
+    foeHp-=8+Math.random()*strength()*0.5;
+    const dmgMult=state.cls==='warrior'?0.6:1;
+    myHp-=(6+Math.random()*f.pow*0.4)*dmgMult;
+    $('foeHp').style.width=Math.max(0,foeHp)+'%';$('myHp').style.width=Math.max(0,myHp)+'%';
+    if(foeHp<=0||myHp<=0){
+      clearInterval(tick);state.inBattle=false;$('fightBtn').disabled=false;
+      if(foeHp<=0&&myHp>foeHp){
+        const reward=Math.floor(f.pow*40*rebirthPointMult()*petMult()*(state.cls==='warrior'?2:1)*(state.multi?2:1));state.score+=reward;
+        state.maxFoe=Math.max(state.maxFoe,state.foeIdx+1);
+        log.innerHTML='\u{1F3C6} You beat <b>'+f.name+'</b>! +'+reward.toLocaleString()+' pts.';
+        if(state.foeIdx<foes.length-1)state.foeIdx++;
+        currentFoe=loadFoe();
+      }else{log.innerHTML='\u{1F480} <b>'+f.name+'</b> crushed you! Get stronger and retry.';loadFoe();}
+      render();save(true);
+    }
+  },300);
+};
+
+// ---- Google Games Zone: 11 Google Doodle Games ----
+const CW=275,CH=110,GY=82,DX=50,DW=22,DH=18;
+let gGame='dino';
+const GTABS=[['dino','\uD83E\uDDAA'],['snake','\uD83D\uDC0D'],['ttt','\u274C\u2B55'],['pacman','\uD83D\uDFE1'],['breakout','\uD83E\uDDF1'],['cricket','\uD83C\uDFCF'],['magic','\uD83D\uDC31'],['hoops','\uD83C\uDFC0'],['hurdles','\uD83C\uDFC3'],['flappy','\uD83E\uDDDB'],['scov','\uD83C\uDF36\uFE0F']];
+const GINFO={dino:'Click/Space jump \u2022 +1\uD83E\uDE99/20 score',snake:'Arrow/WASD move \u2022 +1\uD83E\uDE99/apple',ttt:'Click to play X \u2022 +3\uD83E\uDE99 win \u2022 +1 draw',pacman:'Arrows move \u2022 eat dots \u2022 +1\uD83E\uDE99/10 dots',breakout:'Mouse/arrows for paddle \u2022 +1\uD83E\uDE99/level',cricket:'Space to bat \u2022 time it right \u2022 +1\uD83E\uDE99/run',magic:'Arrow key = ghost symbol \u2022 +1\uD83E\uDE99/ghost',hoops:'Space when meter is green \u2022 +1\uD83E\uDE99/basket',hurdles:'Space to jump \u2022 +1\uD83E\uDE99/3 hurdles',flappy:'Click/Space flap \u2022 +1\uD83E\uDE99/2 pipes',scov:'Arrows/AD dodge peppers \u2022 +1\uD83E\uDE99/10'};
+
+function stopAllGames(){
+  for(const g of[dg,sg,hd,fw,sc,pmg,bk,mc]){if(g){g.on=false;if(g.raf){cancelAnimationFrame(g.raf);g.raf=null;}}}
+  if(ck)ck.on=false;if(bb)bb.on=false;
+}
+function switchGoogleGame(id){if(gGame===id)return;stopAllGames();gGame=id;const a=$('gGameArea');if(a)a.innerHTML='';buildGoogleGameArea();updateGTabs();updateGInfo();}
+function updateGTabs(){GTABS.forEach(([id])=>{const b=$('gtab_'+id);if(b)b.style.background=gGame===id?'var(--warn)':'';});}
+function updateGInfo(){const el=$('gInfo');if(el)el.textContent=GINFO[gGame]||'';}
+function gAddCoins(n){state.gcoins+=n;if($('curGcoins'))$('curGcoins').textContent=state.gcoins;save(true);}
+function gOverlay(cx,msg1,msg2){cx.fillStyle='rgba(0,0,0,.38)';cx.fillRect(0,0,CW,CH);cx.fillStyle='#fff';cx.font='bold 14px monospace';cx.textAlign='center';cx.fillText(msg1,CW/2,42);if(msg2){cx.font='11px monospace';cx.fillText(msg2,CW/2,62);cx.fillText('Click to play again',CW/2,80);}}
+function gHUD(cx,left,right){cx.font='bold 10px monospace';cx.textAlign='left';cx.fillStyle='#1a73e8';cx.fillText('\uD83E\uDE99'+state.gcoins,4,12);if(right){cx.textAlign='right';cx.fillStyle='#333';cx.fillText(right,CW-4,12);}}
+
+function buildGoogleGameArea(){
+  const area=$('gGameArea');if(!area)return;area.innerHTML='';
+  const mkCv=id=>{const cv=document.createElement('canvas');cv.id=id;cv.width=CW;cv.height=CH;cv.style.cssText='display:block;border-radius:8px;border:2px solid #aaa;cursor:pointer;max-width:100%;';area.appendChild(cv);return cv;};
+  const mkTTT=()=>{const w=document.createElement('div');w.style.cssText='display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 0;';const g=document.createElement('div');g.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:195px;';for(let i=0;i<9;i++){const c=document.createElement('button');c.id='tc'+i;c.style.cssText='height:60px;font-size:30px;font-weight:900;border:2px solid var(--pickle-mid);border-radius:8px;background:rgba(255,255,255,.07);color:#f0f7d8;cursor:pointer;';c.onclick=()=>tttMove(i);g.appendChild(c);}const s=document.createElement('div');s.id='tttStatus';s.style.cssText='font-size:13px;font-weight:700;color:var(--brine);';s.textContent='Your turn!';const rb=document.createElement('button');rb.className='sbtn';rb.style.cssText='font-size:13px;padding:8px 18px;';rb.textContent='\u21BA New';rb.onclick=tttReset;w.appendChild(g);w.appendChild(s);w.appendChild(rb);area.appendChild(w);tttReset();};
+  if(gGame==='dino'){const cv=mkCv('dinoCanvas');cv.addEventListener('click',dinoInput);dinoIdle(cv.getContext('2d'));}
+  else if(gGame==='snake'){const cv=mkCv('snakeCanvas');cv.addEventListener('click',()=>sg.on?0:snakeStart());snakeIdle(cv.getContext('2d'));}
+  else if(gGame==='ttt')mkTTT();
+  else if(gGame==='pacman'){const cv=mkCv('pacCanvas');cv.addEventListener('click',()=>pmg.on?0:pmStart());pmIdle(cv.getContext('2d'));}
+  else if(gGame==='breakout'){
+    const cv=mkCv('bkCanvas');cv.addEventListener('click',()=>bk.on?0:bkStart());
+    const mm=e=>{const r=cv.getBoundingClientRect();bk.px=Math.min(CW-bk.bw/2,Math.max(bk.bw/2,e.clientX-r.left));};
+    cv.addEventListener('mousemove',mm);cv._mm=mm;bkIdle(cv.getContext('2d'));
+  }
+  else if(gGame==='cricket'){const cv=mkCv('ckCanvas');cv.addEventListener('click',ckSwing);ckReset();}
+  else if(gGame==='magic'){const cv=mkCv('mcCanvas');cv.addEventListener('click',()=>mc.on?0:mcStart());mcIdle(cv.getContext('2d'));}
+  else if(gGame==='hoops'){const cv=mkCv('bbCanvas');cv.addEventListener('click',bbInput);bbDraw();}
+  else if(gGame==='hurdles'){const cv=mkCv('hdCanvas');cv.addEventListener('click',hdJump);hdIdle(cv.getContext('2d'));}
+  else if(gGame==='flappy'){const cv=mkCv('fwCanvas');cv.addEventListener('click',fwFlap);fwIdle(cv.getContext('2d'));}
+  else if(gGame==='scov'){const cv=mkCv('scCanvas');cv.addEventListener('click',()=>sc.on?0:scStart());scIdle(cv.getContext('2d'));}
+}
+
+// ===== DINO =====
+const dg={on:false,over:false,score:0,hi:0,dy:0,vy:0,gr:true,cacti:[],spd:3,fr:0,nxtC:80,gcE:0,raf:null};
+function dinoInput(){if(!dg.on&&!dg.over)dinoStart();else if(dg.gr&&dg.on){dg.vy=-11;dg.gr=false;}else if(dg.over)dinoStart();}
+function dinoStart(){Object.assign(dg,{on:true,over:false,score:0,dy:GY-DH,vy:0,gr:true,cacti:[],spd:3,fr:0,nxtC:80,gcE:0});if(dg.raf)cancelAnimationFrame(dg.raf);dg.raf=requestAnimationFrame(dinoTick);}
+function dinoTick(){const cv=$('dinoCanvas');if(!cv){dg.on=false;return;}const cx=cv.getContext('2d');dg.fr++;dg.score++;if(dg.fr%500===0)dg.spd+=0.4;if(!dg.gr){dg.vy+=0.55;dg.dy+=dg.vy;if(dg.dy>=GY-DH){dg.dy=GY-DH;dg.vy=0;dg.gr=true;}}dg.nxtC--;if(dg.nxtC<=0){dg.cacti.push({x:CW,h:14+Math.floor(Math.random()*20)});dg.nxtC=50+Math.floor(Math.random()*70);}for(const c of dg.cacti)c.x-=dg.spd;dg.cacti=dg.cacti.filter(c=>c.x>-20);for(const c of dg.cacti){if(DX+18>c.x+1&&DX+4<c.x+12&&dg.dy+4<GY&&dg.dy+DH>GY-c.h){dg.on=false;dg.over=true;dg.hi=Math.max(dg.hi,Math.floor(dg.score/10));const coins=Math.floor(dg.score/200)-dg.gcE;if(coins>0){dg.gcE+=coins;gAddCoins(coins);}dinoDraw(cx);gOverlay(cx,'GAME OVER','Score: '+Math.floor(dg.score/10)+' | +'+dg.gcE+' \uD83E\uDE99');buildGoogleShop($('gShopBody'));return;}}const mil=Math.floor(dg.score/200);if(mil>dg.gcE){gAddCoins(mil-dg.gcE);dg.gcE=mil;}dinoDraw(cx);dg.raf=requestAnimationFrame(dinoTick);}
+function dinoDraw(cx){cx.fillStyle='#f0f0f0';cx.fillRect(0,0,CW,CH);cx.fillStyle='#ccc';for(let i=0;i<3;i++){const x=(dg.fr*0.5+i*95)%CW;cx.fillRect(x,15+i*11,22,3);cx.fillRect(x+9,12+i*11,8,3);}cx.fillStyle='#aaa';cx.fillRect(0,GY,CW,2);const dy=dg.dy,fa=Math.floor(dg.fr/8)%2;cx.fillStyle='#555';cx.fillRect(DX-8,dy+5,10,5);cx.fillRect(DX,dy,DW,DH);cx.fillRect(DX+DW-4,dy-11,13,13);cx.fillStyle='#fff';cx.fillRect(DX+DW+3,dy-8,3,3);cx.fillStyle='#555';cx.fillRect(DX+DW-2,dy+6,5,3);if(dg.gr){cx.fillRect(DX+4,dy+DH,5,fa?10:7);cx.fillRect(DX+12,dy+DH,5,fa?7:10);}else{cx.fillRect(DX+4,dy+DH,5,8);cx.fillRect(DX+12,dy+DH,5,8);}cx.fillStyle='#2a7a1a';for(const c of dg.cacti){cx.fillRect(c.x+3,GY-c.h,7,c.h);cx.fillRect(c.x-3,GY-c.h+8,6,4);cx.fillRect(c.x-3,GY-c.h+4,8,4);cx.fillRect(c.x+10,GY-c.h+10,6,4);cx.fillRect(c.x+9,GY-c.h+6,8,4);}gHUD(cx,null,'HI '+String(dg.hi).padStart(5,'0')+' '+String(Math.floor(dg.score/10)).padStart(5,'0'));}
+function dinoIdle(cx){cx.fillStyle='#f0f0f0';cx.fillRect(0,0,CW,CH);cx.fillStyle='#aaa';cx.fillRect(0,GY,CW,2);cx.fillStyle='#555';cx.font='bold 13px monospace';cx.textAlign='center';cx.fillText('Click to Start!',CW/2,42);const dy=GY-DH;cx.fillStyle='#555';cx.fillRect(DX-8,dy+5,10,5);cx.fillRect(DX,dy,DW,DH);cx.fillRect(DX+DW-4,dy-11,13,13);cx.fillStyle='#fff';cx.fillRect(DX+DW+3,dy-8,3,3);cx.fillStyle='#555';cx.fillRect(DX+4,dy+DH,5,9);cx.fillRect(DX+12,dy+DH,5,9);cx.fillStyle='#2a7a1a';cx.fillRect(CW-42,GY-20,7,20);cx.fillRect(CW-49,GY-14,6,4);cx.fillRect(CW-37,GY-16,6,4);gHUD(cx);}
+
+// ===== SNAKE =====
+const SC=13,SCOLS=Math.floor(CW/SC),SROWS=Math.floor(CH/SC);
+const sg={on:false,over:false,snake:[],dir:{x:1,y:0},nd:{x:1,y:0},food:{x:10,y:4},score:0,hi:0,fr:0,spd:8,raf:null};
+function snakeStart(){sg.snake=[{x:5,y:4},{x:4,y:4},{x:3,y:4}];Object.assign(sg,{dir:{x:1,y:0},nd:{x:1,y:0},score:0,fr:0,on:true,over:false,spd:8});sg.food=snakeFood();if(sg.raf)cancelAnimationFrame(sg.raf);sg.raf=requestAnimationFrame(snakeTick);}
+function snakeFood(){let p;do{p={x:Math.floor(Math.random()*SCOLS),y:Math.floor(Math.random()*SROWS)};}while(sg.snake.some(s=>s.x===p.x&&s.y===p.y));return p;}
+function snakeTick(){sg.fr++;if(sg.fr%sg.spd===0){sg.dir={...sg.nd};const h={x:sg.snake[0].x+sg.dir.x,y:sg.snake[0].y+sg.dir.y};if(h.x<0||h.x>=SCOLS||h.y<0||h.y>=SROWS||sg.snake.some(s=>s.x===h.x&&s.y===h.y)){sg.on=false;sg.over=true;sg.hi=Math.max(sg.hi,sg.score);gAddCoins(sg.score);snakeDraw();const cv=$('snakeCanvas');if(cv)gOverlay(cv.getContext('2d'),'GAME OVER','Score: '+sg.score+' | +'+sg.score+' \uD83E\uDE99');return;}sg.snake.unshift(h);if(h.x===sg.food.x&&h.y===sg.food.y){sg.score++;gAddCoins(1);if(sg.score%5===0)sg.spd=Math.max(3,sg.spd-1);sg.food=snakeFood();}else sg.snake.pop();}snakeDraw();sg.raf=requestAnimationFrame(snakeTick);}
+function snakeDraw(){const cv=$('snakeCanvas');if(!cv)return;const cx=cv.getContext('2d');cx.fillStyle='#e8f5e9';cx.fillRect(0,0,CW,CH);cx.strokeStyle='#c8e6c9';cx.lineWidth=0.5;for(let x=0;x<SCOLS;x++)for(let y=0;y<SROWS;y++)cx.strokeRect(x*SC,y*SC,SC,SC);cx.fillStyle='#e53935';cx.beginPath();cx.arc(sg.food.x*SC+SC/2,sg.food.y*SC+SC/2,SC/2-1,0,Math.PI*2);cx.fill();sg.snake.forEach((s,i)=>{cx.fillStyle=i===0?'#1b5e20':'#388e3c';cx.fillRect(s.x*SC+1,s.y*SC+1,SC-2,SC-2);});gHUD(cx,null,'Hi:'+sg.hi+' Sc:'+sg.score);}
+function snakeIdle(cx){cx.fillStyle='#e8f5e9';cx.fillRect(0,0,CW,CH);cx.fillStyle='#1b5e20';cx.font='bold 13px monospace';cx.textAlign='center';cx.fillText('Click to Start Snake!',CW/2,CH/2+5);gHUD(cx);}
+
+// ===== TIC TAC TOE =====
+const WINS=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+const ttt={board:Array(9).fill(null),turn:'X',over:false};
+function tttReset(){Object.assign(ttt,{board:Array(9).fill(null),turn:'X',over:false});tttRender();}
+function tttCheck(b,p){return WINS.some(w=>w.every(i=>b[i]===p));}
+function tttRender(){for(let i=0;i<9;i++){const c=$('tc'+i);if(!c)return;c.textContent=ttt.board[i]||'';c.style.color=ttt.board[i]==='X'?'#d4e84a':ttt.board[i]==='O'?'#e85d3a':'#f0f7d8';c.disabled=!!ttt.board[i]||ttt.over;}const st=$('tttStatus');if(!st)return;if(tttCheck(ttt.board,'X'))st.textContent='\uD83C\uDF89 You win! +3\uD83E\uDE99';else if(tttCheck(ttt.board,'O'))st.textContent='\uD83D\uDE14 Computer wins!';else if(ttt.board.every(Boolean))st.textContent='\uD83E\uDD1D Draw! +1\uD83E\uDE99';else st.textContent=ttt.turn==='X'?'Your turn! (X)':'Thinking...';}
+function tttMove(i){if(ttt.over||ttt.board[i])return;ttt.board[i]='X';if(tttCheck(ttt.board,'X')){ttt.over=true;gAddCoins(3);tttRender();return;}if(ttt.board.every(Boolean)){ttt.over=true;gAddCoins(1);tttRender();return;}ttt.turn='O';tttRender();setTimeout(()=>{const b=ttt.board;let mv=-1;for(const p of['O','X']){for(const w of WINS){const e=w.filter(i=>!b[i]),f=w.filter(i=>b[i]===p);if(f.length===2&&e.length===1&&mv===-1)mv=e[0];}}if(mv===-1&&!b[4])mv=4;if(mv===-1){const c=[0,2,6,8].filter(i=>!b[i]);if(c.length)mv=c[Math.floor(Math.random()*c.length)];}if(mv===-1){const c=b.map((v,i)=>!v?i:null).filter(i=>i!==null);if(c.length)mv=c[Math.floor(Math.random()*c.length)];}if(mv!==-1)ttt.board[mv]='O';if(tttCheck(ttt.board,'O'))ttt.over=true;else if(ttt.board.every(Boolean)){ttt.over=true;gAddCoins(1);}ttt.turn='X';tttRender();},400);}
+
+// ===== PAC-MAN (open grid, no walls) =====
+const PCS=11,PCOLS=Math.floor(CW/PCS),PROWS=Math.floor(CH/PCS);
+const pmg={on:false,over:false,win:false,px:0,py:0,dir:{x:0,y:0},nd:{x:1,y:0},dots:new Set(),pellets:new Set(),ghosts:[],fr:0,score:0,hi:0,power:0,gcE:0,raf:null};
+function pmStart(){pmg.px=Math.floor(PCOLS/2);pmg.py=Math.floor(PROWS/2);Object.assign(pmg,{dir:{x:0,y:0},nd:{x:1,y:0},fr:0,score:0,over:false,win:false,power:0,gcE:0});pmg.dots=new Set();pmg.pellets=new Set();for(let x=0;x<PCOLS;x++)for(let y=0;y<PROWS;y++)pmg.dots.add(x+','+y);[[1,1],[PCOLS-2,1],[1,PROWS-2],[PCOLS-2,PROWS-2]].forEach(([x,y])=>{pmg.dots.delete(x+','+y);pmg.pellets.add(x+','+y);});pmg.ghosts=[{x:2,y:2,dir:{x:1,y:0},fr:0,blue:0,col:'#e85d3a'},{x:PCOLS-3,y:PROWS-3,dir:{x:-1,y:0},fr:0,blue:0,col:'#ff7eb6'}];if(pmg.raf)cancelAnimationFrame(pmg.raf);pmg.raf=requestAnimationFrame(pmTick);}
+function pmTick(){const cv=$('pacCanvas');if(!cv){pmg.on=false;return;}const cx=cv.getContext('2d');pmg.fr++;if(pmg.power>0)pmg.power--;
+// move pac-man every 8 frames
+if(pmg.fr%8===0){const nx=(pmg.px+pmg.nd.x+PCOLS)%PCOLS,ny=(pmg.py+pmg.nd.y+PROWS)%PROWS;pmg.dir={...pmg.nd};pmg.px=nx;pmg.py=ny;const k=pmg.px+','+pmg.py;if(pmg.pellets.has(k)){pmg.pellets.delete(k);pmg.power=150;pmg.ghosts.forEach(g=>g.blue=150);}else if(pmg.dots.has(k)){pmg.dots.delete(k);pmg.score++;const mil=Math.floor(pmg.score/10);if(mil>pmg.gcE){gAddCoins(mil-pmg.gcE);pmg.gcE=mil;}}if(pmg.dots.size===0&&pmg.pellets.size===0){pmg.win=true;pmg.hi=Math.max(pmg.hi,pmg.score);gAddCoins(5);pmg.on=false;pmDraw(cx);gOverlay(cx,'YOU WIN! +5\uD83E\uDE99','Score: '+pmg.score);return;}}
+// move ghosts every 12 frames
+if(pmg.fr%12===0){pmg.ghosts.forEach((g,gi)=>{if(g.blue>0)g.blue--;const dirs=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];if(gi===0&&!g.blue){const dx=pmg.px-g.x,dy=pmg.py-g.y;const best=dirs.reduce((a,d)=>Math.abs(d.x-(dx/Math.abs(dx||1)))+Math.abs(d.y-(dy/Math.abs(dy||1)))<Math.abs(a.x-(dx/Math.abs(dx||1)))+Math.abs(a.y-(dy/Math.abs(dy||1)))?d:a);g.dir=best;}else if(g.fr%3===0)g.dir=dirs[Math.floor(Math.random()*4)];g.fr++;g.x=(g.x+g.dir.x+PCOLS)%PCOLS;g.y=(g.y+g.dir.y+PROWS)%PROWS;});}
+// check ghost collision
+for(const g of pmg.ghosts){if(g.x===pmg.px&&g.y===pmg.py){if(g.blue>0){g.x=Math.floor(PCOLS/2);g.y=0;g.blue=0;pmg.score+=5;}else{pmg.on=false;pmg.over=true;pmg.hi=Math.max(pmg.hi,pmg.score);pmDraw(cx);gOverlay(cx,'GAME OVER','Score: '+pmg.score);return;}}}
+pmDraw(cx);pmg.raf=requestAnimationFrame(pmTick);}
+function pmDraw(cx){cx.fillStyle='#000';cx.fillRect(0,0,CW,CH);pmg.dots.forEach(k=>{const[x,y]=k.split(',').map(Number);cx.fillStyle='#ffff00';cx.beginPath();cx.arc(x*PCS+PCS/2,y*PCS+PCS/2,1.5,0,Math.PI*2);cx.fill();});pmg.pellets.forEach(k=>{const[x,y]=k.split(',').map(Number);cx.fillStyle='#ffff00';cx.beginPath();cx.arc(x*PCS+PCS/2,y*PCS+PCS/2,3.5+Math.sin(pmg.fr*0.15),0,Math.PI*2);cx.fill();});pmg.ghosts.forEach(g=>{cx.fillStyle=g.blue>0?(g.blue%20<10?'#99f':'#aaf'):(g.col||'#e85d3a');cx.beginPath();const gx=g.x*PCS+PCS/2,gy=g.y*PCS+PCS/2;cx.arc(gx,gy-1,PCS/2-1,Math.PI,0);cx.lineTo(gx+PCS/2-1,gy+PCS/2-1);for(let i=0;i<3;i++)cx.quadraticCurveTo(gx+PCS/2-1-(i*PCS/3),gy+PCS/2-1+3,gx+PCS/2-1-(i+0.5)*PCS/3,gy+PCS/2-1);cx.lineTo(gx-PCS/2+1,gy+PCS/2-1);cx.fill();cx.fillStyle='#fff';cx.beginPath();cx.arc(gx-2,gy-2,2,0,Math.PI*2);cx.fill();cx.arc(gx+2,gy-2,2,0,Math.PI*2);cx.fill();cx.fillStyle='#00f';cx.beginPath();cx.arc(gx-2,gy-1.5,1,0,Math.PI*2);cx.fill();cx.arc(gx+2,gy-1.5,1,0,Math.PI*2);cx.fill();});const mo=Math.sin(pmg.fr*0.3)*0.25+0.15;cx.fillStyle='#FFD700';const px=pmg.px*PCS+PCS/2,py=pmg.py*PCS+PCS/2;let ang=0;if(pmg.dir.x===1)ang=0;else if(pmg.dir.x===-1)ang=Math.PI;else if(pmg.dir.y===1)ang=Math.PI/2;else if(pmg.dir.y===-1)ang=-Math.PI/2;cx.beginPath();cx.moveTo(px,py);cx.arc(px,py,PCS/2-1,ang+mo,ang+Math.PI*2-mo);cx.closePath();cx.fill();gHUD(cx,null,'Hi:'+pmg.hi+' Sc:'+pmg.score+(pmg.power?' PWR':''));}
+function pmIdle(cx){cx.fillStyle='#000';cx.fillRect(0,0,CW,CH);cx.fillStyle='#FFD700';cx.font='bold 13px monospace';cx.textAlign='center';cx.fillText('PAC-MAN \u2022 Click to Start!',CW/2,CH/2);gHUD(cx);}
+
+// ===== BREAKOUT =====
+const BRW=24,BRH=7,BCOLS=10,BROWS=4,BOX=8,BOY=16;
+const bk={on:false,over:false,win:false,bricks:[],px:CW/2,bw:50,ball:{x:CW/2,y:85,vx:2.5,vy:-2.8},score:0,hi:0,gcE:0,raf:null};
+const BRCOLS=['#e85d3a','#ff9a3a','#ffd23f','#86b73a'];
+function bkStart(){bk.bricks=[];for(let r=0;r<BROWS;r++)for(let c=0;c<BCOLS;c++)bk.bricks.push({x:BOX+c*(BRW+2),y:BOY+r*(BRH+3),alive:true,col:BRCOLS[r]});Object.assign(bk,{on:true,over:false,win:false,px:CW/2,ball:{x:CW/2,y:85,vx:2.5+Math.random(),vy:-2.8},score:0,gcE:0});if(bk.raf)cancelAnimationFrame(bk.raf);bk.raf=requestAnimationFrame(bkTick);}
+function bkTick(){const cv=$('bkCanvas');if(!cv){bk.on=false;return;}const cx=cv.getContext('2d');const b=bk.ball;b.x+=b.vx;b.y+=b.vy;if(b.x<5||b.x>CW-5)b.vx*=-1;if(b.y<5)b.vy*=-1;if(b.y>95&&b.y<103&&b.x>bk.px-bk.bw/2&&b.x<bk.px+bk.bw/2){b.vy=-Math.abs(b.vy);b.vx+=(b.x-(bk.px))/20;}if(b.y>CH+10){bk.on=false;bk.over=true;bk.hi=Math.max(bk.hi,bk.score);bkDraw(cx);gOverlay(cx,'GAME OVER','Score: '+bk.score);return;}let alive=0;for(const br of bk.bricks){if(!br.alive)continue;alive++;if(b.x>br.x&&b.x<br.x+BRW&&b.y>br.y&&b.y<br.y+BRH){br.alive=false;b.vy*=-1;bk.score++;const mil=Math.floor(bk.score/5);if(mil>bk.gcE){gAddCoins(mil-bk.gcE);bk.gcE=mil;}break;}}if(alive===0){bk.win=true;bk.hi=Math.max(bk.hi,bk.score);gAddCoins(2);bk.on=false;bkDraw(cx);gOverlay(cx,'LEVEL CLEAR! +2\uD83E\uDE99','Score: '+bk.score);return;}bkDraw(cx);bk.raf=requestAnimationFrame(bkTick);}
+function bkDraw(cx){cx.fillStyle='#0a0a1a';cx.fillRect(0,0,CW,CH);for(const br of bk.bricks){if(!br.alive)continue;cx.fillStyle=br.col;cx.fillRect(br.x,br.y,BRW,BRH);cx.fillStyle='rgba(255,255,255,.3)';cx.fillRect(br.x,br.y,BRW,2);}cx.fillStyle='#ccc';cx.fillRect(bk.px-bk.bw/2,97,bk.bw,6);cx.fillStyle='rgba(255,255,255,.5)';cx.fillRect(bk.px-bk.bw/2,97,bk.bw/3,3);const b=bk.ball;cx.fillStyle='#fff';cx.beginPath();cx.arc(b.x,b.y,5,0,Math.PI*2);cx.fill();gHUD(cx,null,'Hi:'+bk.hi+' Sc:'+bk.score);}
+function bkIdle(cx){cx.fillStyle='#0a0a1a';cx.fillRect(0,0,CW,CH);cx.fillStyle='#ccc';cx.font='bold 13px monospace';cx.textAlign='center';cx.fillText('BREAKOUT \u2022 Click to Start!',CW/2,CH/2);gHUD(cx);}
+
+// ===== CRICKET =====
+const ck={on:false,balls:6,runs:0,wickets:0,ballX:CW-10,power:50,pDir:1,phase:'idle',hi:0,fr:0,lastResult:''};
+function ckReset(){Object.assign(ck,{on:false,balls:6,runs:0,wickets:0,ballX:CW-10,power:50,pDir:1,phase:'idle',fr:0,lastResult:''});ckDraw();}
+function ckSwing(){
+  if(ck.phase==='idle'){ck.on=true;ck.phase='bowling';ckTick();return;}
+  if(ck.phase==='result'){ckReset();return;}
+  if(ck.phase!=='bowling')return;
+  ck.balls--;
+  const hitZone=ck.ballX<85&&ck.ballX>35;
+  if(hitZone){const pct=ck.power;let r=0;if(pct>70||pct<30)r=4+Math.floor(Math.random()*3);else if(pct>50||pct<50)r=1+Math.floor(Math.random()*3);else r=Math.floor(Math.random()*2);ck.runs+=r;ck.lastResult=r===0?'Miss!':r>=6?'SIX!':r>=4?'FOUR!':r+' run'+(r>1?'s':'')+'!';gAddCoins(r);}else{ck.wickets++;ck.lastResult='WICKET!';}
+  ck.phase=ck.balls<=0||ck.wickets>=3?'result':'bowling';ck.ballX=CW-10;ck.hi=Math.max(ck.hi,ck.runs);
+}
+function ckTick(){const cv=$('ckCanvas');if(!cv){ck.on=false;return;}ck.fr++;ck.power=50+45*Math.sin(ck.fr*0.08);if(ck.phase==='bowling')ck.ballX-=2.5;if(ck.ballX<-10){ck.balls--;ck.wickets++;ck.lastResult='MISSED!';ck.phase=ck.balls<=0||ck.wickets>=3?'result':'bowling';ck.ballX=CW-10;}ckDraw();if(ck.on&&ck.phase!=='result')requestAnimationFrame(ckTick);}
+function ckDraw(){const cv=$('ckCanvas');if(!cv)return;const cx=cv.getContext('2d');cx.fillStyle='#2d6a1a';cx.fillRect(0,0,CW,CH);cx.fillStyle='#3a8a22';cx.ellipse(CW/2,CH/2,120,55,0,0,Math.PI*2);cx.fill();cx.fillStyle='#4aaa2a';cx.fillRect(CW/2-2,20,4,80);cx.fillStyle='#8B4513';cx.fillRect(30,CH-22,10,20);cx.fillRect(26,CH-20,18,4);cx.strokeStyle='#fff';cx.lineWidth=2;cx.beginPath();cx.moveTo(30,20);cx.lineTo(30,CH-22);cx.stroke();if(ck.phase!=='idle'){cx.fillStyle='#e85d3a';cx.beginPath();cx.arc(ck.ballX,CH/2,7,0,Math.PI*2);cx.fill();cx.fillStyle='#c00';cx.fillRect(ck.ballX-7,CH/2-1,14,2);}const pct=(ck.power)/100;cx.fillStyle='#333';cx.fillRect(CW-20,10,10,CH-20);cx.fillStyle=pct>0.7||pct<0.3?'#22cc44':'#ffd23f';cx.fillRect(CW-20,10+(CH-20)*(1-pct),10,(CH-20)*pct);cx.fillStyle='#fff';cx.lineWidth=1;cx.strokeStyle='#fff';cx.strokeRect(CW-20,10+(CH-20)*0.3,10,(CH-20)*0.4);const info=ck.phase==='idle'?'Click to start':ck.phase==='result'?'Innings over! Score:'+ck.runs+'(Hi:'+ck.hi+') Click':ck.lastResult||'Tap SPACE/click to bat';cx.fillStyle='#fff';cx.font='bold 11px monospace';cx.textAlign='center';cx.fillText(info,CW/2-20,14);cx.fillText('Balls: '+ck.balls+' Wkts: '+ck.wickets+' Runs: '+ck.runs,CW/2-20,CH-5);gHUD(cx);}
+
+// ===== MAGIC CAT ACADEMY =====
+const MC_DIRS=[{code:'ArrowUp',sym:'\u2191'},{code:'ArrowDown',sym:'\u2193'},{code:'ArrowLeft',sym:'\u2190'},{code:'ArrowRight',sym:'\u2191'}];
+MC_DIRS[3]={code:'ArrowRight',sym:'\u2192'};
+const mc={on:false,over:false,ghosts:[],hearts:3,score:0,hi:0,fr:0,spawnTimer:80,gcE:0,raf:null};
+function mcStart(){Object.assign(mc,{on:true,over:false,ghosts:[],hearts:3,score:0,fr:0,spawnTimer:80,gcE:0});if(mc.raf)cancelAnimationFrame(mc.raf);mc.raf=requestAnimationFrame(mcTick);}
+function mcTick(){const cv=$('mcCanvas');if(!cv){mc.on=false;return;}mc.fr++;mc.spawnTimer--;if(mc.spawnTimer<=0){const dir=MC_DIRS[Math.floor(Math.random()*4)];mc.ghosts.push({x:CW-30,y:20+Math.floor(Math.random()*(CH-40)),dir,spd:0.8+mc.score*0.03,hit:false,flash:0});mc.spawnTimer=Math.max(40,80-mc.score*3);}for(const g of mc.ghosts){g.x-=g.spd;if(g.flash>0)g.flash--;}const dead=mc.ghosts.filter(g=>g.x<35&&!g.hit);dead.forEach(()=>{mc.hearts--;});mc.ghosts=mc.ghosts.filter(g=>g.x>-10&&(g.x>35||g.hit));mc.ghosts=mc.ghosts.filter(g=>!g.hit||g.flash>0);if(mc.hearts<=0){mc.on=false;mc.over=true;mc.hi=Math.max(mc.hi,mc.score);mcDraw();const cv2=$('mcCanvas');if(cv2)gOverlay(cv2.getContext('2d'),'GAME OVER','Score: '+mc.score+' | Hi: '+mc.hi);return;}mcDraw();mc.raf=requestAnimationFrame(mcTick);}
+function mcKey(code){if(!mc.on)return;mc.ghosts.filter(g=>!g.hit&&g.dir.code===code&&g.x<CW-20).sort((a,b)=>a.x-b.x).slice(0,1).forEach(g=>{g.hit=true;g.flash=15;mc.score++;const mil=Math.floor(mc.score/5);if(mil>mc.gcE){gAddCoins(mil-mc.gcE);mc.gcE=mil;}});}
+function mcDraw(){const cv=$('mcCanvas');if(!cv)return;const cx=cv.getContext('2d');cx.fillStyle='#1a0a2a';cx.fillRect(0,0,CW,CH);cx.fillStyle='#ff7eb6';cx.beginPath();cx.ellipse(30,CH/2,12,18,0,0,Math.PI*2);cx.fill();cx.fillStyle='#f0f7d8';cx.beginPath();cx.arc(30,CH/2-8,6,0,Math.PI*2);cx.fill();cx.fillStyle='#2a0a4a';cx.beginPath();cx.arc(30,CH/2-9,2,0,Math.PI*2);cx.fill();cx.fillStyle='#ffd23f';cx.font='bold 10px monospace';for(let i=0;i<mc.hearts;i++)cx.fillText('\u2665',4+i*14,CH-6);for(const g of mc.ghosts){const hit=g.hit&&g.flash>0;cx.globalAlpha=hit?0.3:1;cx.fillStyle=hit?'#fff':'#7a6aff';cx.beginPath();cx.arc(g.x,g.y,14,Math.PI,0);cx.lineTo(g.x+14,g.y+12);for(let i=0;i<3;i++)cx.quadraticCurveTo(g.x+14-i*9,g.y+16,g.x+14-(i+0.5)*9,g.y+12);cx.lineTo(g.x-14,g.y+12);cx.fill();cx.fillStyle='#fff';cx.font='bold 14px sans-serif';cx.textAlign='center';cx.fillText(g.dir.sym,g.x,g.y+6);cx.globalAlpha=1;}cx.textAlign='left';gHUD(cx,null,'Hi:'+mc.hi+' Sc:'+mc.score);}
+function mcIdle(cx){cx.fillStyle='#1a0a2a';cx.fillRect(0,0,CW,CH);cx.fillStyle='#ff7eb6';cx.font='bold 13px monospace';cx.textAlign='center';cx.fillText('MAGIC CAT \u2022 Click to Start!',CW/2,CH/2-6);cx.fillStyle='#aaa';cx.font='10px monospace';cx.fillText('Press arrow key matching ghost symbol',CW/2,CH/2+10);gHUD(cx);}
+
+// ===== BASKETBALL =====
+const bb={power:0,pDir:1,shooting:false,ball:{x:45,y:88},bvy:0,bvx:0,score:0,hi:0,fr:0,made:false,miss:false,timer:0};
+function bbInput(){if(bb.shooting)return;bb.shooting=true;const pwr=bb.power/100;bb.bvx=3.5+pwr*2;bb.bvy=-(6+pwr*4);bb.ball={x:45,y:88};bb.made=false;bb.miss=false;}
+function bbDraw(){const cv=$('bbCanvas');if(!cv)return;const cx=cv.getContext('2d');cx.fillStyle='#c87941';cx.fillRect(0,0,CW,CH);cx.fillStyle='#b06830';for(let i=0;i<4;i++)cx.fillRect(0,i*28,CW,2);cx.fillStyle='#c8a070';cx.fillRect(0,CH-15,CW,15);cx.fillStyle='#555';cx.fillRect(240,15,4,50);cx.fillStyle='#e85d3a';cx.fillRect(236,15,12,4);cx.strokeStyle='#e85d3a';cx.lineWidth=3;cx.beginPath();cx.arc(242,26,8,0,Math.PI*2);cx.stroke();cx.fillStyle='#8B4513';cx.beginPath();cx.arc(bb.ball.x,bb.ball.y,8,0,Math.PI*2);cx.fill();cx.strokeStyle='#000';cx.lineWidth=1;cx.beginPath();cx.arc(bb.ball.x,bb.ball.y,8,0,Math.PI*2);cx.stroke();if(!bb.shooting){const pct=bb.power/100;cx.fillStyle='#333';cx.fillRect(10,CH-12,80,8);cx.fillStyle=pct>0.65&&pct<0.85?'#22cc44':'#e85d3a';cx.fillRect(10,CH-12,80*pct,8);cx.fillStyle='rgba(255,255,255,.4)';cx.fillRect(10+(80*0.65),CH-12,80*0.2,8);}if(bb.made){cx.fillStyle='#ffd23f';cx.font='bold 18px monospace';cx.textAlign='center';cx.fillText('SWISH! +1\uD83E\uDE99',CW/2,40);}if(bb.miss){cx.fillStyle='#e85d3a';cx.font='bold 14px monospace';cx.textAlign='center';cx.fillText('MISS!',CW/2,40);}cx.textAlign='left';gHUD(cx,null,'Hi:'+bb.hi+' Sc:'+bb.score);}
+function bbTick(){if(!$('bbCanvas'))return;bb.fr++;bb.power=50+48*Math.sin(bb.fr*0.06);if(bb.shooting){bb.bvx*=0.995;bb.bvy+=0.28;bb.ball.x+=bb.bvx;bb.ball.y+=bb.bvy;if(!bb.made&&!bb.miss&&bb.ball.x>232&&bb.ball.x<252&&bb.ball.y>20&&bb.ball.y<32){bb.made=true;bb.score++;bb.hi=Math.max(bb.hi,bb.score);gAddCoins(1);bb.timer=60;}if(bb.ball.x>CW||bb.ball.y>CH){if(!bb.made)bb.miss=true;bb.timer=40;}if(bb.timer>0){bb.timer--;if(bb.timer<=0){bb.shooting=false;bb.ball={x:45,y:88};bb.made=false;bb.miss=false;}}}bbDraw();requestAnimationFrame(bbTick);}
+
+// ===== HURDLES =====
+const hd={on:false,over:false,dy:78,vy:0,gr:true,hurdles:[],score:0,hi:0,spd:2.5,fr:0,nxtH:120,gcE:0,raf:null};
+function hdJump(){if(!hd.on&&!hd.over){hdStart();return;}if(hd.gr&&hd.on){hd.vy=-8;hd.gr=false;}else if(hd.over)hdStart();}
+function hdStart(){Object.assign(hd,{on:true,over:false,dy:78,vy:0,gr:true,hurdles:[],score:0,spd:2.5,fr:0,nxtH:120,gcE:0});if(hd.raf)cancelAnimationFrame(hd.raf);hd.raf=requestAnimationFrame(hdTick);}
+function hdTick(){const cv=$('hdCanvas');if(!cv){hd.on=false;return;}const cx=cv.getContext('2d');hd.fr++;hd.score++;if(hd.fr%400===0)hd.spd+=0.3;if(!hd.gr){hd.vy+=0.5;hd.dy+=hd.vy;if(hd.dy>=78){hd.dy=78;hd.vy=0;hd.gr=true;}}hd.nxtH--;if(hd.nxtH<=0){hd.hurdles.push({x:CW});hd.nxtH=90+Math.floor(Math.random()*60);}for(const h of hd.hurdles)h.x-=hd.spd;hd.hurdles=hd.hurdles.filter(h=>h.x>-10);for(const h of hd.hurdles){if(h.x>35&&h.x<65&&hd.dy>62){hd.on=false;hd.over=true;hd.hi=Math.max(hd.hi,Math.floor(hd.score/10));hdDraw(cx);gOverlay(cx,'GAME OVER','Hurdles: '+Math.floor(hd.score/10));return;}}const mil=Math.floor(hd.score/300);if(mil>hd.gcE){gAddCoins(mil-hd.gcE);hd.gcE=mil;}hdDraw(cx);hd.raf=requestAnimationFrame(hdTick);}
+function hdDraw(cx){cx.fillStyle='#87CEEB';cx.fillRect(0,0,CW,CH);cx.fillStyle='#4a8a2a';cx.fillRect(0,85,CW,CH);cx.fillStyle='#3a7a1a';cx.fillRect(0,85,CW,4);cx.fillStyle='#e85d3a';cx.fillRect(45,hd.dy-28,8,28);cx.fillRect(41,hd.dy-30,16,4);cx.fillStyle='#ffd23f';cx.fillRect(45,hd.dy,8,8);cx.fillRect(41,hd.dy+4,16,4);for(const h of hd.hurdles){cx.fillStyle='#e85d3a';cx.fillRect(h.x-4,69,4,20);cx.fillRect(h.x+4,69,4,20);cx.fillRect(h.x-4,67,12,4);}gHUD(cx,null,'Hi:'+hd.hi+' Cl:'+Math.floor(hd.score/10));}
+function hdIdle(cx){cx.fillStyle='#87CEEB';cx.fillRect(0,0,CW,CH);cx.fillStyle='#4a8a2a';cx.fillRect(0,85,CW,CH);cx.fillStyle='#e85d3a';cx.font='bold 13px monospace';cx.textAlign='center';cx.fillText('HURDLES \u2022 Click/Space to Start!',CW/2,CH/2-5);gHUD(cx);}
+
+// ===== FLAPPY WITCH =====
+const fw={on:false,over:false,y:55,vy:0,pipes:[],score:0,hi:0,fr:0,nxtP:90,gcE:0,raf:null};
+function fwFlap(){if(!fw.on&&!fw.over){fwStart();return;}if(fw.on)fw.vy=-4;else if(fw.over)fwStart();}
+function fwStart(){Object.assign(fw,{on:true,over:false,y:55,vy:0,pipes:[],score:0,fr:0,nxtP:90,gcE:0});if(fw.raf)cancelAnimationFrame(fw.raf);fw.raf=requestAnimationFrame(fwTick);}
+function fwTick(){const cv=$('fwCanvas');if(!cv){fw.on=false;return;}const cx=cv.getContext('2d');fw.fr++;fw.vy+=0.25;fw.y+=fw.vy;fw.nxtP--;if(fw.nxtP<=0){const gap=30+Math.random()*20,top=15+Math.random()*(CH-gap-25);fw.pipes.push({x:CW,top,bot:top+gap});fw.nxtP=85+Math.floor(Math.random()*30);}for(const p of fw.pipes){p.x-=2;if(!p.scored&&p.x<50){p.scored=true;fw.score++;const mil=Math.floor(fw.score/2);if(mil>fw.gcE){gAddCoins(mil-fw.gcE);fw.gcE=mil;}}}fw.pipes=fw.pipes.filter(p=>p.x>-30);if(fw.y<5||fw.y>CH-10){fw.on=false;fw.over=true;fw.hi=Math.max(fw.hi,fw.score);fwDraw(cx);gOverlay(cx,'GAME OVER','Pipes: '+fw.score+' Hi: '+fw.hi);return;}for(const p of fw.pipes){if(50>p.x&&40<p.x+20&&(fw.y-8<p.top||fw.y+8>p.bot)){fw.on=false;fw.over=true;fw.hi=Math.max(fw.hi,fw.score);fwDraw(cx);gOverlay(cx,'GAME OVER','Pipes: '+fw.score+' Hi: '+fw.hi);return;}}fwDraw(cx);fw.raf=requestAnimationFrame(fwTick);}
+function fwDraw(cx){cx.fillStyle='#1a0a2a';cx.fillRect(0,0,CW,CH);for(let i=0;i<20;i++){cx.fillStyle='rgba(255,255,255,'+(0.3+Math.random()*0.4)+')';cx.beginPath();cx.arc(Math.sin(i*13.7)*CW/2+CW/2,(fw.fr*0.3+i*30)%CH,1,0,Math.PI*2);cx.fill();}cx.fillStyle='#4a2a8a';for(const p of fw.pipes){cx.fillRect(p.x,0,20,p.top);cx.fillRect(p.x,-2,20,p.top+4);cx.fillRect(p.x,p.bot,20,CH-p.bot);cx.fillRect(p.x,p.bot-4,20,8);}cx.fillStyle='#ff7eb6';cx.beginPath();cx.arc(50,fw.y,8,0,Math.PI*2);cx.fill();cx.fillStyle='#1a0a2a';cx.beginPath();cx.arc(50,fw.y-3,5,Math.PI,0);cx.fill();cx.fillStyle='#ffd23f';cx.beginPath();cx.moveTo(42,fw.y-8);cx.lineTo(50,fw.y-18);cx.lineTo(58,fw.y-8);cx.closePath();cx.fill();gHUD(cx,null,'Hi:'+fw.hi+' Sc:'+fw.score);}
+function fwIdle(cx){cx.fillStyle='#1a0a2a';cx.fillRect(0,0,CW,CH);cx.fillStyle='#ff7eb6';cx.font='bold 13px monospace';cx.textAlign='center';cx.fillText('FLAPPY WITCH \u2022 Click to Start!',CW/2,CH/2);gHUD(cx);}
+
+// ===== SCOVILLE =====
+const sc={on:false,over:false,px:CW/2,peppers:[],lives:3,score:0,hi:0,fr:0,nxtP:50,gcE:0,raf:null,left:false,right:false};
+function scStart(){Object.assign(sc,{on:true,over:false,px:CW/2,peppers:[],lives:3,score:0,fr:0,nxtP:50,gcE:0});if(sc.raf)cancelAnimationFrame(sc.raf);sc.raf=requestAnimationFrame(scTick);}
+function scTick(){const cv=$('scCanvas');if(!cv){sc.on=false;return;}const cx=cv.getContext('2d');sc.fr++;sc.score++;if(sc.left)sc.px=Math.max(12,sc.px-3);if(sc.right)sc.px=Math.min(CW-12,sc.px+3);sc.nxtP--;if(sc.nxtP<=0){const spd=1.5+sc.score*0.003;sc.peppers.push({x:Math.random()*(CW-20)+10,y:-10,spd,col:spd>3?'#6a0aaa':spd>2.5?'#e85d3a':'#4a8a2a'});sc.nxtP=Math.max(20,50-sc.score*0.05);}for(const p of sc.peppers)p.y+=p.spd;const hit=sc.peppers.filter(p=>Math.abs(p.x-sc.px)<14&&p.y>88&&p.y<105);hit.forEach(()=>sc.lives--);sc.peppers=sc.peppers.filter(p=>p.y<CH&&!hit.includes(p));if(sc.lives<=0){sc.on=false;sc.over=true;sc.hi=Math.max(sc.hi,Math.floor(sc.score/10));scDraw(cx);gOverlay(cx,'GAME OVER','Score: '+Math.floor(sc.score/10)+' Hi: '+sc.hi);return;}const mil=Math.floor(sc.score/100);if(mil>sc.gcE){gAddCoins(mil-sc.gcE);sc.gcE=mil;}scDraw(cx);sc.raf=requestAnimationFrame(scTick);}
+function scDraw(cx){cx.fillStyle='#fff9e6';cx.fillRect(0,0,CW,CH);for(const p of sc.peppers){cx.fillStyle=p.col;cx.beginPath();cx.ellipse(p.x,p.y,4,8,0.3,0,Math.PI*2);cx.fill();}cx.fillStyle='#e85d3a';cx.beginPath();cx.ellipse(sc.px,95,10,7,0,0,Math.PI*2);cx.fill();cx.fillStyle='#fff';cx.fillRect(sc.px-2,88,4,7);cx.fillStyle='#ffd23f';for(let i=0;i<sc.lives;i++){cx.font='12px monospace';cx.textAlign='left';cx.fillText('\u2665',CW-45+i*14,14);}gHUD(cx,null,'Hi:'+sc.hi+' Sc:'+Math.floor(sc.score/10));}
+function scIdle(cx){cx.fillStyle='#fff9e6';cx.fillRect(0,0,CW,CH);cx.fillStyle='#e85d3a';cx.font='bold 13px monospace';cx.textAlign='center';cx.fillText('SCOVILLE \u2022 Click to Start!',CW/2,CH/2-5);cx.fillStyle='#555';cx.font='10px monospace';cx.fillText('Dodge the falling peppers!',CW/2,CH/2+10);gHUD(cx);}
+
+// ===== SHOP + ZONE RENDER =====
+function buildGoogleShop(box){
+  if(!box)return;box.innerHTML='';
+  const sh=document.createElement('div');sh.style.cssText='font-size:11px;color:#7a9050;margin:10px 0 4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;';sh.textContent='GOOGLE SKINS:';box.appendChild(sh);
+  specialSkins.filter(s=>s.earn&&s.earn.type==='gcoins').forEach(s=>{const owned=state.earned.includes(s.id);const can=!owned&&state.gcoins>=s.earn.value;const el=document.createElement('div');el.className='shop-item'+((owned||can)?'':' cant');el.innerHTML='<div class="shop-icon">'+s.icon+'</div><div class="shop-info"><div class="shop-name">'+s.name+' '+(owned?'<span class="shop-owned">OWNED</span>':'')+'</div><div class="shop-desc">Google skin for Dressing Room</div></div><div class="shop-cost" style="color:#1a73e8;">'+(owned?'\u2713':s.earn.value+' \uD83E\uDE99')+'</div>';if(!owned)el.onclick=()=>{if(state.gcoins<s.earn.value)return;state.gcoins-=s.earn.value;state.earned.push(s.id);$('battleLog').innerHTML='\uD83C\uDF89 Unlocked <b>'+s.name+'</b>!';render();save(true);};box.appendChild(el);});
+  const ph=document.createElement('div');ph.style.cssText='font-size:11px;color:#7a9050;margin:10px 0 4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;';ph.textContent='GOOGLE PETS (\u00D71.5 each):';box.appendChild(ph);
+  googlePets.forEach(p=>{const can=!p.owned&&state.gcoins>=p.cost;const el=document.createElement('div');el.className='shop-item'+((p.owned||can)?'':' cant');el.innerHTML='<div class="shop-icon">'+p.icon+'</div><div class="shop-info"><div class="shop-name">'+p.name+' '+(p.owned?'<span class="shop-owned">OWNED</span>':'')+'</div><div class="shop-desc">\u00D71.5 points</div></div><div class="shop-cost" style="color:#1a73e8;">'+(p.owned?'\u2713':p.cost+' \uD83E\uDE99')+'</div>';if(!p.owned)el.onclick=()=>{if(state.gcoins<p.cost)return;state.gcoins-=p.cost;p.owned=true;if(!state.googlePetsOwned.includes(p.id))state.googlePetsOwned.push(p.id);render();save(true);};box.appendChild(el);});
+}
+function renderGoogleGamesZone(){
+  const box=$('googleGameBody');if(!box)return;
+  if(!box.querySelector('#gTabs')){
+    const tabs=document.createElement('div');tabs.id='gTabs';tabs.style.cssText='display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;';
+    GTABS.forEach(([id,lbl])=>{const b=document.createElement('button');b.id='gtab_'+id;b.className='sbtn';b.style.cssText='font-size:11px;padding:5px 8px;';b.textContent=lbl;b.onclick=()=>switchGoogleGame(id);tabs.appendChild(b);});
+    box.appendChild(tabs);
+    const area=document.createElement('div');area.id='gGameArea';box.appendChild(area);
+    const info=document.createElement('div');info.id='gInfo';info.style.cssText='font-size:11px;color:var(--pickle-light);text-align:center;margin:4px 0 6px;';box.appendChild(info);
+    const shop=document.createElement('div');shop.id='gShopBody';box.appendChild(shop);
+    buildGoogleGameArea();updateGTabs();updateGInfo();
+    // start basketball tick loop
+    requestAnimationFrame(bbTick);
+    // start cricket RAF-less tick via interval
+    // global key handler
+    document.addEventListener('keydown',e=>{
+      const preventKeys=['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'];
+      if(['snake','pacman','scoville','magic','hurdles'].includes(gGame)||e.code==='Space')if(preventKeys.includes(e.code))e.preventDefault();
+      if(gGame==='dino'&&e.code==='Space')dinoInput();
+      else if(gGame==='snake'){const m={ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0},KeyW:{x:0,y:-1},KeyS:{x:0,y:1},KeyA:{x:-1,y:0},KeyD:{x:1,y:0}};const nd=m[e.code];if(nd){if(!sg.on)snakeStart();else if(!(nd.x===-sg.dir.x&&nd.y===-sg.dir.y))sg.nd=nd;}}
+      else if(gGame==='pacman'){const m={ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0}};const nd=m[e.code];if(nd){if(!pmg.on)pmStart();else pmg.nd=nd;}}
+      else if(gGame==='breakout'){if(e.code==='ArrowLeft')bk.px=Math.max(bk.bw/2,bk.px-15);if(e.code==='ArrowRight')bk.px=Math.min(CW-bk.bw/2,bk.px+15);if(e.code==='Space')bkStart();}
+      else if(gGame==='cricket'&&e.code==='Space')ckSwing();
+      else if(gGame==='magic')mcKey(e.code);
+      else if(gGame==='hoops'&&e.code==='Space')bbInput();
+      else if(gGame==='hurdles'&&e.code==='Space')hdJump();
+      else if(gGame==='flappy'&&e.code==='Space')fwFlap();
+      else if(gGame==='scov'){if(e.code==='ArrowLeft'||e.code==='KeyA')sc.left=true;if(e.code==='ArrowRight'||e.code==='KeyD')sc.right=true;if(e.code==='Space'&&!sc.on)scStart();}
+    });
+    document.addEventListener('keyup',e=>{if(gGame==='scov'){if(e.code==='ArrowLeft'||e.code==='KeyA')sc.left=false;if(e.code==='ArrowRight'||e.code==='KeyD')sc.right=false;}});
+  }
+  if($('curGcoins'))$('curGcoins').textContent=state.gcoins;
+  buildGoogleShop($('gShopBody'));
+}
+let sprunkyCtx=null,sprunkyLoopTO=null,sprunkyBeatsTick=null,sprunkyMusicOn=false;
+
+function sprunkyNote(ctx,type,freq,t,dur,vol){
+  const o=ctx.createOscillator(),g=ctx.createGain();
+  o.type=type;o.frequency.setValueAtTime(freq,t);
+  g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+dur);
+}
+function sprunkyNoise(ctx,t,dur,vol,hipass){
+  const buf=ctx.createBuffer(1,Math.ceil(ctx.sampleRate*dur),ctx.sampleRate);
+  const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  const src=ctx.createBufferSource(),g=ctx.createGain(),f=ctx.createBiquadFilter();
+  f.type='highpass';f.frequency.value=hipass||4000;
+  src.buffer=buf;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  src.connect(f);f.connect(g);g.connect(ctx.destination);src.start(t);
+}
+function sprunkyKick(ctx,t){
+  const o=ctx.createOscillator(),g=ctx.createGain();
+  o.frequency.setValueAtTime(160,t);o.frequency.exponentialRampToValueAtTime(40,t+0.1);
+  g.gain.setValueAtTime(0.7,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.18);
+  o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+0.25);
+}
+function scheduleSprunkyLoop(ctx){
+  const s=60/128/2;const t=ctx.currentTime+0.05;
+  const notes=[261.63,293.66,329.63,369.99,392,440,493.88,523.25];
+  const mel= [0,2,4,6,5,4,2,4, 1,3,5,7,6,4,3,1];
+  for(let i=0;i<16;i++){
+    const st=t+i*s;
+    if(i===0||i===6||i===10)sprunkyKick(ctx,st);
+    if(i===4||i===12)sprunkyNoise(ctx,st,0.12,0.35,200);
+    if(i%2===0)sprunkyNoise(ctx,st,0.04,0.1,6000);
+    sprunkyNote(ctx,'sine',notes[mel[i]],st,s*0.72,0.14);
+    if(i%4===0)sprunkyNote(ctx,'square',notes[mel[i]]/2,st,s*1.8,0.07);
+  }
+  sprunkyLoopTO=setTimeout(()=>{if(sprunkyMusicOn&&sprunkyCtx===ctx)scheduleSprunkyLoop(ctx);},16*s*1000-60);
+}
+function startSprunkyMusic(){
+  if(sprunkyMusicOn)return;
+  try{sprunkyCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){return;}
+  sprunkyMusicOn=true;scheduleSprunkyLoop(sprunkyCtx);
+  sprunkyBeatsTick=setInterval(()=>{
+    state.beats++;
+    if($('curBeats'))$('curBeats').textContent=state.beats;
+    renderSprunkySongRoom();
+  },5000);
+  renderSprunkySongRoom();
+}
+function stopSprunkyMusic(){
+  sprunkyMusicOn=false;
+  if(sprunkyLoopTO)clearTimeout(sprunkyLoopTO);
+  if(sprunkyBeatsTick)clearInterval(sprunkyBeatsTick);
+  if(sprunkyCtx){sprunkyCtx.close();sprunkyCtx=null;}
+  renderSprunkySongRoom();
+}
+function renderSprunkySongRoom(){
+  const box=$('sprunkySongBody');if(!box)return;box.innerHTML='';
+  // music toggle
+  const btn=document.createElement('button');
+  btn.className='music-btn'+(sprunkyMusicOn?' on':'');
+  btn.textContent=sprunkyMusicOn?'\u23F9\uFE0F Stop Music':'\u25B6\uFE0F Play Sprunky Music';
+  btn.onclick=()=>sprunkyMusicOn?stopSprunkyMusic():startSprunkyMusic();
+  box.appendChild(btn);
+  // beats info
+  const bbar=document.createElement('div');bbar.className='beats-bar';
+  bbar.textContent='\u{1F3B5} '+Math.floor(state.beats)+' Beats'+(sprunkyMusicOn?' \u2022 +1 every 5s':'');
+  box.appendChild(bbar);
+  // sprunky skins
+  const sh=document.createElement('div');sh.style.cssText='font-size:11px;color:#7a9050;margin:8px 0 4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;';
+  sh.textContent='SPRUNKY SKINS (unlock with Beats):';box.appendChild(sh);
+  specialSkins.filter(s=>s.earn&&s.earn.type==='beats').forEach(s=>{
+    const owned=state.earned.includes(s.id);
+    const can=!owned&&state.beats>=s.earn.value;
+    const el=document.createElement('div');
+    el.className='shop-item'+((owned||can)?'':' cant');
+    el.innerHTML='<div class="shop-icon">'+s.icon+'</div>'+
+      '<div class="shop-info"><div class="shop-name">'+s.name+' '+(owned?'<span class="shop-owned">OWNED</span>':'')+'</div>'+
+      '<div class="shop-desc">Sprunky skin \u2014 no clothing allowed</div></div>'+
+      '<div class="shop-cost" style="color:var(--pink);">'+(owned?'\u2713':s.earn.value+' \u{1F3B5}')+'</div>';
+    if(!owned)el.onclick=()=>{
+      if(state.beats<s.earn.value)return;
+      state.beats-=s.earn.value;state.earned.push(s.id);
+      $('battleLog').innerHTML='\u{1F389} Unlocked <b>'+s.name+'</b>! Equip it in the Dressing Room.';
+      render();save(true);
+    };
+    box.appendChild(el);
+  });
+  // sprunky pets
+  const ph=document.createElement('div');ph.style.cssText='font-size:11px;color:#7a9050;margin:10px 0 4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;';
+  ph.textContent='SPRUNKY PETS (\u00D71.5 each):';box.appendChild(ph);
+  sprunkyPets.forEach(p=>{
+    const can=!p.owned&&state.beats>=p.cost;
+    const el=document.createElement('div');
+    el.className='shop-item'+((p.owned||can)?'':' cant');
+    el.innerHTML='<div class="shop-icon">'+p.icon+'</div>'+
+      '<div class="shop-info"><div class="shop-name">'+p.name+' '+(p.owned?'<span class="shop-owned">OWNED</span>':'')+'</div>'+
+      '<div class="shop-desc">\u00D71.5 points \u2022 stands beside your pickle</div></div>'+
+      '<div class="shop-cost" style="color:var(--pink);">'+(p.owned?'\u2713':p.cost+' \u{1F3B5}')+'</div>';
+    if(!p.owned)el.onclick=()=>{
+      if(state.beats<p.cost)return;
+      state.beats-=p.cost;p.owned=true;
+      if(!state.sprunkyPetsOwned.includes(p.id))state.sprunkyPetsOwned.push(p.id);
+      render();save(true);
+    };
+    box.appendChild(el);
+  });
+}
+setInterval(()=>save(true),15000);
+window.addEventListener('beforeunload',()=>save(true));
+$('saveTag').textContent='Auto-saves on';
+
+// ---- offline tracker (for No Internet Dino skin) ----
+setInterval(()=>{
+  if(typeof navigator!=='undefined'&&navigator.onLine===false){
+    state.offlineSeconds++;
+    const dino=specialSkins.find(s=>s.id==='dino');
+    if(dino&&!state.earned.includes('dino')&&state.offlineSeconds<=dino.earn.value+2){
+      // re-render dressing room so the progress counter updates while user watches
+      if(typeof renderDressing==='function')renderDressing();
+      checkEarned();
+    }
+  }
+},1000);
+window.addEventListener('offline',()=>{if($('saveTag'))$('saveTag').textContent='Offline \u2014 dino is watching';});
+window.addEventListener('online',()=>{if($('saveTag'))$('saveTag').textContent='Auto-saves on';});
+
+// ---- lego brick trickle (1 brick every brickRate() seconds) ----
+let brickAccum=0;
+setInterval(()=>{
+  brickAccum++;
+  if(brickAccum>=brickRate()){
+    state.bricks++;brickAccum=0;
+    if($('curBricks'))$('curBricks').textContent=Math.floor(state.bricks);
+    // only re-render the lego panel (not full render, to keep it lightweight)
+    renderLegoCenter();
+  }
+},1000);
+
+// ---- collapsible panels ----
+(function(){
+  let folded=null;
+  try{const raw=localStorage.getItem('pickleFolded');if(raw)folded=JSON.parse(raw);}catch(e){}
+  const firstTime=!folded;
+  if(firstTime)folded={};
+  document.querySelectorAll('.panel').forEach(p=>{
+    const h=p.querySelector('h2');if(!h)return;
+    const key=h.textContent.trim();
+    // default: collapsed. Only expanded if explicitly saved as false.
+    const isCollapsed = folded[key]===undefined ? true : folded[key];
+    if(isCollapsed)p.classList.add('col');
+    if(firstTime)folded[key]=true;
+    h.addEventListener('click',()=>{
+      p.classList.toggle('col');
+      folded[key]=p.classList.contains('col');
+      try{localStorage.setItem('pickleFolded',JSON.stringify(folded));}catch(e){}
+    });
+  });
+  if(firstTime){try{localStorage.setItem('pickleFolded',JSON.stringify(folded));}catch(e){}}
+})();
+</script>
+</body>
+</html>
